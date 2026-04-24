@@ -1,11 +1,23 @@
-- name: Build
-  run: npm run build
+name: Release
 
-- name: Create Release
-  uses: softprops/action-gh-release@v1
-  with:
-    files: |
-      main.js
-      manifest.json
-      styles.css
-    prerelease: true  # remove for stable
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build plugin
+        run: npm ci && npm run build
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            main.js
+            manifest.json
+            styles.css
