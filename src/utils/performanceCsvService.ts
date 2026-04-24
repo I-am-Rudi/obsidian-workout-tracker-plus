@@ -27,6 +27,7 @@ export class PerformanceCsvService {
   csvPath: string;
   readonly header =
     "timestamp,date,planId,planName,routineId,routineName,exerciseId,exerciseName,setIndex,previousReps,previousWeight,targetReps,targetWeight,actualReps,actualWeight,completed,recordType,notes";
+  readonly columnCount = this.header.split(",").length;
 
   constructor(app: App, csvPath: string) {
     this.app = app;
@@ -142,8 +143,8 @@ export class PerformanceCsvService {
     }
 
     const latest = matching[matching.length - 1];
-    const reps = this.toNumber(latest.targetReps || latest.actualReps);
-    const weight = this.toNumber(latest.targetWeight || latest.actualWeight);
+    const reps = this.parseNumber(latest.targetReps || latest.actualReps);
+    const weight = this.parseNumber(latest.targetWeight || latest.actualWeight);
     return { reps, weight };
   }
 
@@ -161,7 +162,7 @@ export class PerformanceCsvService {
     const rows: PerformanceCsvRow[] = [];
     for (const line of lines.slice(1)) {
       const cols = this.parseCsvLine(line);
-      if (cols.length < 18) {
+      if (cols.length !== this.columnCount) {
         continue;
       }
       rows.push({
@@ -248,7 +249,7 @@ export class PerformanceCsvService {
     return value === undefined ? "" : String(value);
   }
 
-  private toNumber(value: string): number | undefined {
+  private parseNumber(value: string): number | undefined {
     if (!value) return undefined;
     const parsed = Number(value);
     return Number.isNaN(parsed) ? undefined : parsed;

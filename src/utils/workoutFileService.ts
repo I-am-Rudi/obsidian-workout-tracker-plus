@@ -249,6 +249,7 @@ export class WorkoutFileService {
       const frontmatter = parseYaml(yamlContent);
 
       // Validate and construct workout object
+      // Support both legacy and new discriminator markers for backwards compatibility.
       if (
         !frontmatter ||
         (!frontmatter.workoutTracker &&

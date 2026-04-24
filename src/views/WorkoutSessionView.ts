@@ -114,11 +114,13 @@ export class WorkoutSessionView extends ItemView {
                 : undefined,
             actualReps:
               exercise.sets.length > 0
-                ? exercise.sets[exercise.sets.length - 1].targetReps
+                ? exercise.sets[exercise.sets.length - 1].actualReps ??
+                  exercise.sets[exercise.sets.length - 1].targetReps
                 : undefined,
             actualWeight:
               exercise.sets.length > 0
-                ? exercise.sets[exercise.sets.length - 1].targetWeight
+                ? exercise.sets[exercise.sets.length - 1].actualWeight ??
+                  exercise.sets[exercise.sets.length - 1].targetWeight
                 : undefined,
           });
           this.session!.hasRoutineChanges = true;

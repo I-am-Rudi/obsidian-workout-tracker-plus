@@ -137,9 +137,13 @@ export class WorkoutSessionService {
         return entry;
       }
 
-      const limit = finishOptions.routineChangeStrategy !== "ignore"
-        ? sessionExercise.sets.length
-        : entry.sets.length;
+      // "ignore" keeps the original routine structure, but still allows target
+      // value refreshes on existing sets when storeNewTargets is enabled.
+      // "overwrite" and "create_new" both adopt session structure (set count/order);
+      // the caller decides whether that merged result replaces the current routine
+      // or gets saved as a new routine definition.
+      const allowStructureChanges = finishOptions.routineChangeStrategy !== "ignore";
+      const limit = allowStructureChanges ? sessionExercise.sets.length : entry.sets.length;
       const sets = [];
       for (let i = 0; i < limit; i++) {
         const existing = entry.sets[i] || {};

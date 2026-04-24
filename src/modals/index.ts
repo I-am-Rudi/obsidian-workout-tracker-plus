@@ -8,3 +8,4 @@ export { WorkoutEditModal } from "./WorkoutEditModal";
 export { RoutineSelectionModal } from "./RoutineSelectionModal";
 export { PlanSelectionModal } from "./PlanSelectionModal";
 export { SessionFinishModal } from "./SessionFinishModal";
+export { InputPromptModal } from "./InputPromptModal";

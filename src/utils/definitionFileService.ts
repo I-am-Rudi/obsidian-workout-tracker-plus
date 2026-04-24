@@ -29,7 +29,7 @@ export class DefinitionFileService {
 
   async createExerciseDefinition(def: ExerciseDefinition): Promise<TFile | null> {
     await this.ensureFolders();
-    const fileName = this.createSafeName(def.name);
+    const fileName = this.createSafeName(def.name, "exercise-note");
     const path = `${this.settings.exerciseLibraryFolder}/${fileName}.md`;
     const existing = this.app.vault.getAbstractFileByPath(path);
     const content = this.renderExerciseDefinition(def);
@@ -42,7 +42,7 @@ export class DefinitionFileService {
 
   async createRoutineDefinition(def: RoutineDefinition): Promise<TFile | null> {
     await this.ensureFolders();
-    const fileName = this.createSafeName(def.name);
+    const fileName = this.createSafeName(def.name, "routine-note");
     const path = `${this.settings.routinesFolder}/${fileName}.md`;
     const existing = this.app.vault.getAbstractFileByPath(path);
     const content = this.renderRoutineDefinition(def);
@@ -57,7 +57,7 @@ export class DefinitionFileService {
     def: WorkoutPlanDefinition
   ): Promise<TFile | null> {
     await this.ensureFolders();
-    const fileName = this.createSafeName(def.name);
+    const fileName = this.createSafeName(def.name, "plan-note");
     const path = `${this.settings.workoutPlansFolder}/${fileName}.md`;
     const existing = this.app.vault.getAbstractFileByPath(path);
     const content = this.renderPlanDefinition(def);
@@ -334,8 +334,15 @@ export class DefinitionFileService {
     }\n`;
   }
 
-  private createSafeName(name: string): string {
-    return name.replace(/[^a-zA-Z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+  private createSafeName(name: string, fallbackPrefix: string): string {
+    const sanitized = name
+      .replace(/[^a-zA-Z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return sanitized.length > 0
+      ? sanitized
+      : `${fallbackPrefix}-${Date.now()}`;
   }
 
   private findExerciseByLink(
@@ -346,7 +353,7 @@ export class DefinitionFileService {
     const normalized = link.replace(/\[\[|\]\]/g, "").replace(/\.md$/, "");
     return exercises.find((exercise) => {
       const byPath = exercise.filePath?.replace(/\.md$/, "");
-      return exercise.id === normalized || exercise.name === normalized || byPath === normalized;
+      return byPath === normalized || exercise.id === normalized || exercise.name === normalized;
     });
   }
 }

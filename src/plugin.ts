@@ -25,6 +25,7 @@ import { PerformanceCsvService } from "./utils/performanceCsvService";
 import { WorkoutSessionService } from "./utils/workoutSessionService";
 import {
   ExerciseTemplateModal,
+  InputPromptModal,
   PlanSelectionModal,
   QuickWorkoutModal,
   RoutineSelectionModal,
@@ -41,6 +42,7 @@ import {
 } from "./views/WorkoutSessionView";
 
 export default class WorkoutTrackerPlugin extends Plugin {
+  private static readonly DEFAULT_SINGLE_EXERCISE_SETS = 3;
   settings: WorkoutTrackerSettings;
   fileService: WorkoutFileService;
   definitionService: DefinitionFileService;
@@ -355,7 +357,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
         } else if (options.routineChangeStrategy === "create_new") {
           const nextRoutine: RoutineDefinition = {
             ...merged,
-            id: `${merged.id}-${Date.now()}`,
+            id: `${merged.id}-${sessionToSave.id}`,
             name: `${merged.name} (updated ${sessionToSave.date})`,
             filePath: undefined,
           };
@@ -404,7 +406,11 @@ export default class WorkoutTrackerPlugin extends Plugin {
           {
             exerciseId: exercise.id,
             exerciseName: exercise.name,
-            sets: Array.from({ length: exercise.defaultSets || 3 }).map(() => ({
+            sets: Array.from({
+              length:
+                exercise.defaultSets ||
+                WorkoutTrackerPlugin.DEFAULT_SINGLE_EXERCISE_SETS,
+            }).map(() => ({
               reps: exercise.defaultReps,
               weight: exercise.defaultWeight,
               duration: exercise.defaultDuration,
@@ -475,6 +481,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
       try {
         leaf = this.app.workspace.getLeaf("window");
       } catch (error) {
+        console.debug("Workout Tracker: popout unavailable, using fallback leaf.", error);
         leaf = null;
       }
     }
@@ -537,9 +544,9 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
   private prompt(label: string): Promise<string | null> {
     return new Promise((resolve) => {
-      // eslint-disable-next-line no-alert
-      const value = window.prompt(label);
-      resolve(value ? value.trim() : null);
+      new InputPromptModal(this.app, label, "Enter value", (value) => {
+        resolve(value);
+      }).open();
     });
   }
 
