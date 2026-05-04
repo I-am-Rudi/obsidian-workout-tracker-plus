@@ -323,9 +323,15 @@ export class DefinitionFileService {
       planTags: def.planTags || [],
       workoutTracker: true,
     };
-    return `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n${
-      def.notes || ""
-    }\n`;
+    let body = `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n`;
+    if (def.estimatedDuration) {
+      body += `**Estimated Duration:** ${def.estimatedDuration} min\n\n`;
+    }
+    if (def.notes) {
+      body += `${def.notes}\n\n`;
+    }
+    body += this.renderRoutineTable(def.exercises);
+    return body;
   }
 
   private renderPlanDefinition(def: WorkoutPlanDefinition): string {
@@ -337,9 +343,60 @@ export class DefinitionFileService {
       notes: def.notes,
       workoutTracker: true,
     };
-    return `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n${
-      def.notes || ""
-    }\n`;
+    let body = `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n`;
+    if (def.notes) {
+      body += `${def.notes}\n\n`;
+    }
+    body += this.renderPlanTable(def.routines);
+    return body;
+  }
+
+  private renderRoutineTable(exercises: RoutineExerciseEntry[]): string {
+    let content = "## Exercises\n\n";
+    if (!exercises.length) {
+      return content + "*No exercises added yet.*\n";
+    }
+    const weightUnit = this.settings.weightUnit || "kg";
+    for (const exercise of exercises) {
+      // Build heading: use exerciseLink with alias if available, else plain name.
+      // The pipe in [[path|Name]] is safe in heading context (not a table cell),
+      // so no escaping is needed here.
+      const heading = exercise.exerciseLink
+        ? exercise.exerciseLink.replace(/\]\]$/, `|${exercise.exerciseName}]]`)
+        : exercise.exerciseName;
+      content += `### ${heading}\n\n`;
+      if (exercise.sets.length > 0) {
+        content += `| Set | Reps | Weight (${weightUnit}) | Duration | Distance | Rest |\n`;
+        content += `|-----|------|----------|----------|----------|------|\n`;
+        exercise.sets.forEach((set, i) => {
+          content += `| ${i + 1} | ${set.reps ?? "-"} | ${set.weight ?? "-"} | ${set.duration ?? "-"} | ${set.distance ?? "-"} | ${set.restTime ?? "-"} |\n`;
+        });
+      }
+      if (exercise.notes) {
+        content += `\n**Notes:** ${exercise.notes}\n`;
+      }
+      content += "\n";
+    }
+    return content;
+  }
+
+  private renderPlanTable(routines: WorkoutPlanRoutineEntry[]): string {
+    let content = "## Routines\n\n";
+    if (!routines.length) {
+      return content + "*No routines added yet.*\n";
+    }
+    content += "| Routine | Day | Notes |\n";
+    content += "|---------|-----|-------|\n";
+    for (const routine of routines) {
+      // Escape the alias pipe for table cells: [[path|Name]] → [[path\|Name]]
+      const nameCell = routine.routineLink
+        ? routine.routineLink.replace(/\]\]$/, `\\|${routine.routineName}]]`)
+        : routine.routineName;
+      const day = routine.day || "-";
+      const notes = routine.notes || "-";
+      content += `| ${nameCell} | ${day} | ${notes} |\n`;
+    }
+    return content + "\n";
   }
 
   private createSafeFileName(name: string, fallbackPrefix: string): string {
