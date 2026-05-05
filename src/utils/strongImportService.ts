@@ -72,27 +72,6 @@ export function parseCsvLine(line: string): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// Type mapping helpers
-// ---------------------------------------------------------------------------
-
-function mapExerciseType(
-  strongType: string
-): "strength" | "cardio" | "flexibility" | "other" {
-  switch (strongType.trim().toLowerCase()) {
-    case "barbell":
-    case "dumbbell":
-    case "machine":
-    case "cable":
-      return "strength";
-    case "cardio":
-      return "cardio";
-    case "stretching":
-      return "flexibility";
-    default:
-      return "other";
-  }
-}
-
 function deriveIdFromStrongDate(dateStr: string): string {
   // dateStr format: "YYYY-MM-DD HH:MM:SS"
   const ms = Date.parse(dateStr.replace(" ", "T"));
