@@ -12,8 +12,8 @@ function splitNoteContent(content: string): { prefix: string; body: string } {
   }
   const afterFm = content.slice(fmMatch[0].length);
 
-  // Match an optional blank line + H1 heading + newline
-  const titleMatch = afterFm.match(/^\n*# [^\n]*\n/);
+  // Match an optional blank line + H1 heading + optional newline
+  const titleMatch = afterFm.match(/^\n*# [^\n]*\n?/);
   if (!titleMatch) {
     return { prefix: fmMatch[0], body: afterFm };
   }
@@ -59,11 +59,11 @@ export class ExerciseNoteModal extends Modal {
       cls: "exercise-note-modal-textarea",
     });
     textarea.value = body;
-    // Focus and move cursor to end
-    setTimeout(() => {
+    // Focus and move cursor to end after rendering
+    requestAnimationFrame(() => {
       textarea.focus();
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    }, 50);
+    });
 
     const footer = contentEl.createDiv({ cls: "exercise-note-modal-footer" });
 
