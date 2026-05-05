@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import WorkoutTrackerPlugin from "../plugin";
 import { ExerciseTemplateSettingModal } from "./ExerciseTemplateSettingModal";
 import { WorkoutTemplateSettingModal } from "./WorkoutTemplateSettingModal";
+import { StrongImportModal } from "../modals/StrongImportModal";
 
 export class WorkoutTrackerSettingTab extends PluginSettingTab {
   plugin: WorkoutTrackerPlugin;
@@ -168,6 +169,16 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
           await this.plugin.migrateTemplatesToNotes();
           this.display();
         })
+      );
+
+    containerEl.createEl("h3", { text: "Import" });
+    new Setting(containerEl)
+      .setName("Import from Strong App")
+      .setDesc("Import workout history exported from the Strong app (workouts.csv / exercises.csv).")
+      .addButton((btn) =>
+        btn
+          .setButtonText("Import from Strong App")
+          .onClick(() => new StrongImportModal(this.app, this.plugin).open())
       );
 
     // Exercise Templates Section

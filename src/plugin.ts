@@ -32,6 +32,7 @@ import {
   QuickWorkoutModal,
   RoutineSelectionModal,
   SessionFinishModal,
+  StrongImportModal,
   WorkoutEditModal,
   WorkoutModal,
   WorkoutStatsModal,
@@ -224,6 +225,12 @@ export default class WorkoutTrackerPlugin extends Plugin {
       callback: async () => {
         await this.createPlanNoteFromPrompt();
       },
+    });
+
+    this.addCommand({
+      id: "import-from-strong",
+      name: "Import from Strong App",
+      callback: () => new StrongImportModal(this.app, this).open(),
     });
 
     this.addCommand({
