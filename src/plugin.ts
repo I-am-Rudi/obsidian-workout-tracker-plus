@@ -62,7 +62,8 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.fileService = new WorkoutFileService(
       this.app,
-      this.settings.defaultWorkoutFolder
+      this.settings.defaultWorkoutFolder,
+      this.settings
     );
     this.definitionService = new DefinitionFileService(this.app, this.settings);
     this.performanceCsvService = new PerformanceCsvService(
@@ -257,10 +258,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
     }
 
     if (this.fileService) {
-      this.fileService = new WorkoutFileService(
-        this.app,
-        this.settings.defaultWorkoutFolder
-      );
+      this.fileService.setSettings(this.settings);
     }
     if (this.definitionService) {
       this.definitionService.setSettings(this.settings);

@@ -293,7 +293,7 @@ export class DefinitionFileService {
   }
 
   private renderExerciseDefinition(def: ExerciseDefinition): string {
-    const frontmatter = {
+    const baseFrontmatter = {
       workoutTrackerType: "exercise",
       id: def.id,
       name: def.name,
@@ -307,13 +307,17 @@ export class DefinitionFileService {
       notes: def.notes,
       workoutTracker: true,
     };
-    return `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n${
-      def.notes || ""
-    }\n`;
+    const templateFm = this.parseTemplateFrontmatter(
+      this.settings.noteTemplates?.exercise?.frontmatter
+    );
+    const frontmatter = { ...templateFm, ...baseFrontmatter };
+    const body =
+      `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n${def.notes || ""}\n`;
+    return this.appendTemplateBody(body, this.settings.noteTemplates?.exercise?.body);
   }
 
   private renderRoutineDefinition(def: RoutineDefinition): string {
-    const frontmatter = {
+    const baseFrontmatter = {
       workoutTrackerType: "routine",
       id: def.id,
       name: def.name,
@@ -323,6 +327,10 @@ export class DefinitionFileService {
       planTags: def.planTags || [],
       workoutTracker: true,
     };
+    const templateFm = this.parseTemplateFrontmatter(
+      this.settings.noteTemplates?.routine?.frontmatter
+    );
+    const frontmatter = { ...templateFm, ...baseFrontmatter };
     let body = `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n`;
     if (def.estimatedDuration) {
       body += `**Estimated Duration:** ${def.estimatedDuration} min\n\n`;
@@ -331,11 +339,11 @@ export class DefinitionFileService {
       body += `${def.notes}\n\n`;
     }
     body += this.renderRoutineTable(def.exercises);
-    return body;
+    return this.appendTemplateBody(body, this.settings.noteTemplates?.routine?.body);
   }
 
   private renderPlanDefinition(def: WorkoutPlanDefinition): string {
-    const frontmatter = {
+    const baseFrontmatter = {
       workoutTrackerType: "plan",
       id: def.id,
       name: def.name,
@@ -343,12 +351,16 @@ export class DefinitionFileService {
       notes: def.notes,
       workoutTracker: true,
     };
+    const templateFm = this.parseTemplateFrontmatter(
+      this.settings.noteTemplates?.plan?.frontmatter
+    );
+    const frontmatter = { ...templateFm, ...baseFrontmatter };
     let body = `---\n${stringifyYaml(frontmatter)}---\n\n# ${def.name}\n\n`;
     if (def.notes) {
       body += `${def.notes}\n\n`;
     }
     body += this.renderPlanTable(def.routines);
-    return body;
+    return this.appendTemplateBody(body, this.settings.noteTemplates?.plan?.body);
   }
 
   private renderRoutineTable(exercises: RoutineExerciseEntry[]): string {
@@ -397,6 +409,24 @@ export class DefinitionFileService {
       content += `| ${nameCell} | ${day} | ${notes} |\n`;
     }
     return content + "\n";
+  }
+
+  private parseTemplateFrontmatter(yaml: string | undefined): Record<string, unknown> {
+    if (!yaml?.trim()) return {};
+    try {
+      const parsed = parseYaml(yaml);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private appendTemplateBody(base: string, templateBody: string | undefined): string {
+    const trimmed = templateBody?.trim();
+    if (!trimmed) return base;
+    return base.endsWith("\n") ? `${base}\n${trimmed}\n` : `${base}\n\n${trimmed}\n`;
   }
 
   private createSafeFileName(name: string, fallbackPrefix: string): string {

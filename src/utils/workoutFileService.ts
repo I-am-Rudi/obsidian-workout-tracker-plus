@@ -1,14 +1,21 @@
 import { App, TFile, Notice } from "obsidian";
-import { Workout, Exercise, ExerciseSet } from "../types";
+import { Workout, Exercise, ExerciseSet, WorkoutTrackerSettings } from "../types";
 import { parseYaml, stringifyYaml } from "obsidian";
 
 export class WorkoutFileService {
   app: App;
   workoutFolder: string;
+  private settings: WorkoutTrackerSettings | null = null;
 
-  constructor(app: App, workoutFolder: string) {
+  constructor(app: App, workoutFolder: string, settings?: WorkoutTrackerSettings) {
     this.app = app;
     this.workoutFolder = workoutFolder;
+    if (settings) this.settings = settings;
+  }
+
+  setSettings(settings: WorkoutTrackerSettings) {
+    this.settings = settings;
+    this.workoutFolder = settings.defaultWorkoutFolder;
   }
 
   /**
@@ -177,7 +184,7 @@ export class WorkoutFileService {
    * Generate markdown content with frontmatter
    */
   private generateWorkoutFileContent(workout: Workout): string {
-    const frontmatter = {
+    const baseFrontmatter = {
       id: workout.id,
       date: workout.date,
       name: workout.name,
@@ -193,6 +200,11 @@ export class WorkoutFileService {
       workoutTrackerType: "workout",
       workoutTracker: true, // Tag to identify workout files
     };
+
+    const templateFm = this.parseTemplateFrontmatter(
+      this.settings?.noteTemplates?.workout?.frontmatter
+    );
+    const frontmatter = { ...templateFm, ...baseFrontmatter };
 
     let content = "---\n";
     content += stringifyYaml(frontmatter);
@@ -229,7 +241,24 @@ export class WorkoutFileService {
       content += `## Notes\n\n${workout.notes}\n`;
     }
 
+    const templateBody = this.settings?.noteTemplates?.workout?.body?.trim();
+    if (templateBody) {
+      content += `\n${templateBody}\n`;
+    }
+
     return content;
+  }
+
+  private parseTemplateFrontmatter(yaml: string | undefined): Record<string, unknown> {
+    if (!yaml?.trim()) return {};
+    try {
+      const parsed = parseYaml(yaml);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
+    }
   }
 
   /**

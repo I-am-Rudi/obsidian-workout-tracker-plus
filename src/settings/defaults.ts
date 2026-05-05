@@ -2,6 +2,7 @@ import {
   WorkoutTrackerSettings,
   ExerciseTemplate,
   WorkoutTemplate,
+  NoteContentTemplates,
 } from "../types";
 
 export const DEFAULT_SETTINGS: WorkoutTrackerSettings = {
@@ -51,5 +52,11 @@ export const DEFAULT_SETTINGS: WorkoutTrackerSettings = {
     completed: false,
     exerciseCount: 0,
     routineCount: 0,
+  },
+  noteTemplates: {
+    exercise: { frontmatter: "", body: "" },
+    routine: { frontmatter: "", body: "" },
+    plan: { frontmatter: "", body: "" },
+    workout: { frontmatter: "", body: "" },
   },
 };

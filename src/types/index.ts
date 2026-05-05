@@ -1,3 +1,17 @@
+export interface NoteContentTemplate {
+  /** YAML text whose parsed properties are merged into the generated frontmatter. */
+  frontmatter?: string;
+  /** Markdown text appended beneath the generated note body. */
+  body?: string;
+}
+
+export interface NoteContentTemplates {
+  exercise?: NoteContentTemplate;
+  routine?: NoteContentTemplate;
+  plan?: NoteContentTemplate;
+  workout?: NoteContentTemplate;
+}
+
 export interface WorkoutTrackerSettings {
   defaultWorkoutFolder: string;
   exerciseLibraryFolder: string;
@@ -12,6 +26,7 @@ export interface WorkoutTrackerSettings {
   dateFormat: string;
   weightUnit: "kg" | "lb";
   migration: MigrationState;
+  noteTemplates: NoteContentTemplates;
 }
 
 export interface MigrationState {
