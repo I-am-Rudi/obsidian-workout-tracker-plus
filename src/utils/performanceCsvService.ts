@@ -1,5 +1,6 @@
 import { App, TFile } from "obsidian";
-import { WorkoutSession } from "../types";
+import { Workout, WorkoutSession } from "../types";
+import { createIdFromName } from "./idUtils";
 
 interface PerformanceCsvRow {
   timestamp: string;
@@ -106,6 +107,45 @@ export class PerformanceCsvService {
     }
   }
 
+  async appendImportedWorkout(workout: Workout): Promise<void> {
+    const file = await this.ensureFile();
+    const rows: string[] = [];
+    const timestamp = workout.id
+      ? new Date(parseInt(workout.id, 36)).toISOString()
+      : new Date().toISOString();
+    for (const exercise of workout.exercises) {
+      const exerciseId = createIdFromName(exercise.name);
+      for (let i = 0; i < exercise.sets.length; i++) {
+        const set = exercise.sets[i];
+        rows.push(
+          this.toCsvLine({
+            timestamp,
+            date: workout.date,
+            planId: "",
+            planName: "",
+            routineId: "",
+            routineName: "",
+            exerciseId,
+            exerciseName: exercise.name,
+            setIndex: (i + 1).toString(),
+            previousReps: "",
+            previousWeight: "",
+            targetReps: "",
+            targetWeight: "",
+            actualReps: this.toCell(set.reps),
+            actualWeight: this.toCell(set.weight),
+            completed: "true",
+            recordType: "imported",
+            notes: "",
+          })
+        );
+      }
+    }
+    if (rows.length) {
+      await this.app.vault.append(file, `${rows.join("\n")}\n`);
+    }
+  }
+
   async appendTargetUpdate(session: WorkoutSession): Promise<void> {
     const file = await this.ensureFile();
     const rows: string[] = [];
@@ -155,7 +195,7 @@ export class PerformanceCsvService {
           Number(row.setIndex) === setIndex &&
           (!routineId || row.routineId === routineId)
       )
-      .filter((row) => row.recordType === "target_update" || row.recordType === "session");
+      .filter((row) => row.recordType === "target_update" || row.recordType === "session" || row.recordType === "imported");
 
     if (!matching.length) {
       return null;

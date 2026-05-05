@@ -4,6 +4,7 @@ import { ExerciseSettingsPage } from "./ExerciseSettingsPage";
 import { RoutineSettingsPage } from "./RoutineSettingsPage";
 import { PlanSettingsPage } from "./PlanSettingsPage";
 import { NoteContentTemplatesPage } from "./NoteContentTemplatesPage";
+import { StrongImportModal } from "../modals/StrongImportModal";
 
 type SettingsPage = "main" | "exercises" | "routines" | "plans" | "templates";
 
@@ -191,6 +192,16 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
           await this.plugin.migrateTemplatesToNotes();
           this.display();
         })
+      );
+
+    containerEl.createEl("h3", { text: "Import" });
+    new Setting(containerEl)
+      .setName("Import from Strong App")
+      .setDesc("Import workout history exported from the Strong app (workouts.csv / exercises.csv).")
+      .addButton((btn) =>
+        btn
+          .setButtonText("Import from Strong App")
+          .onClick(() => new StrongImportModal(this.app, this.plugin).open())
       );
 
     containerEl.createEl("h3", { text: "Library" });

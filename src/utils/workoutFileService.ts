@@ -171,6 +171,39 @@ export class WorkoutFileService {
   }
 
   /**
+   * Return the vault path that saveWorkout would use for this workout,
+   * without actually writing anything.  Used for duplicate detection.
+   */
+  getWorkoutFilePath(workout: Workout): string {
+    return `${this.workoutFolder}/${this.generateFileName(workout)}`;
+  }
+
+  /**
+   * Same as saveWorkout but suppresses per-file Notice messages.
+   * Intended for bulk import flows where a single summary notice is preferred.
+   */
+  async saveWorkoutSilently(workout: Workout): Promise<TFile | null> {
+    try {
+      const fileName = this.generateFileName(workout);
+      const filePath = `${this.workoutFolder}/${fileName}`;
+
+      if (!this.app.vault.getAbstractFileByPath(this.workoutFolder)) {
+        await this.app.vault.createFolder(this.workoutFolder);
+      }
+
+      const content = this.generateWorkoutFileContent(workout);
+      const existingFile = this.app.vault.getAbstractFileByPath(filePath);
+      if (existingFile instanceof TFile) {
+        await this.app.vault.modify(existingFile, content);
+        return existingFile;
+      }
+      return await this.app.vault.create(filePath, content);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Generate filename for workout
    */
   private generateFileName(workout: Workout): string {
