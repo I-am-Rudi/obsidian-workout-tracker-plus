@@ -31,7 +31,7 @@ export class WorkoutSessionView extends ItemView {
   }
 
   async onClose() {
-    this.timerIntervals.forEach((id) => clearInterval(id));
+    this.timerIntervals.forEach((intervalId) => clearInterval(intervalId));
     this.timerIntervals.clear();
     this.contentEl.empty();
   }
@@ -464,7 +464,7 @@ export class WorkoutSessionView extends ItemView {
 
     const tick = () => {
       const remaining = this.timerRemaining.get(exerciseIndex);
-      if (remaining === undefined || remaining <= 0) {
+      if (remaining === undefined || remaining < 0) {
         clearInterval(this.timerIntervals.get(exerciseIndex));
         this.timerIntervals.delete(exerciseIndex);
         this.timerRemaining.delete(exerciseIndex);
@@ -473,10 +473,10 @@ export class WorkoutSessionView extends ItemView {
         new Notice("🏋️ Rest complete! Time for the next set.");
         return;
       }
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
       display.style.display = "flex";
-      display.textContent = `⏱ ${mins}:${secs.toString().padStart(2, "0")} — tap to stop`;
+      display.textContent = `⏱ ${minutes}:${seconds.toString().padStart(2, "0")} — tap to stop`;
       this.timerRemaining.set(exerciseIndex, remaining - 1);
     };
 
