@@ -291,6 +291,15 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+    if (this.fileService) {
+      this.fileService.setSettings(this.settings);
+    }
+    if (this.definitionService) {
+      this.definitionService.setSettings(this.settings);
+    }
+    if (this.performanceCsvService) {
+      this.performanceCsvService.setPath(this.settings.performanceCsvPath);
+    }
   }
 
   async createWorkoutFile(workout: Workout): Promise<void> {
