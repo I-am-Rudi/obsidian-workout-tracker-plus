@@ -1,6 +1,7 @@
 import {
   RoutineDefinition,
   SessionFinishOptions,
+  SetType,
   Workout,
   WorkoutSession,
   WorkoutSessionExercise,
@@ -42,6 +43,7 @@ export class WorkoutSessionService {
           restTime: exercise.sets[i]?.restTime,
           completed: false,
           notes: "",
+          setType: exercise.sets[i]?.setType,
         });
       }
       exercises.push({
@@ -123,6 +125,7 @@ export class WorkoutSessionService {
           duration: set.duration,
           distance: set.distance,
           restTime: set.restTime,
+          setType: set.setType,
         })),
       })),
     };
@@ -142,7 +145,7 @@ export class WorkoutSessionService {
 
     const buildSets = (
       sessionExercise: WorkoutSessionExercise,
-      existingSets: { reps?: number; weight?: number; duration?: number; distance?: number; restTime?: number }[]
+      existingSets: { reps?: number; weight?: number; duration?: number; distance?: number; restTime?: number; setType?: SetType }[]
     ) => {
       const limit = allowStructureChanges ? sessionExercise.sets.length : existingSets.length;
       const sets = [];
@@ -165,6 +168,7 @@ export class WorkoutSessionService {
           duration: fromSession.duration ?? existing.duration,
           distance: fromSession.distance ?? existing.distance,
           restTime: fromSession.restTime ?? existing.restTime,
+          setType: fromSession.setType ?? existing.setType,
         });
       }
       return sets;

@@ -59,12 +59,15 @@ export interface Exercise {
   notes?: string;
 }
 
+export type SetType = "default" | "warmup" | "dropset" | "myoreps";
+
 export interface ExerciseSet {
   reps?: number;
   weight?: number;
   duration?: number;
   distance?: number;
   restTime?: number;
+  setType?: SetType;
 }
 
 export interface Workout {
@@ -104,6 +107,7 @@ export interface RoutineExerciseSetTarget {
   duration?: number;
   distance?: number;
   restTime?: number;
+  setType?: SetType;
 }
 
 export interface RoutineExerciseEntry {
@@ -153,6 +157,7 @@ export interface WorkoutSessionSet {
   restTime?: number;
   completed: boolean;
   notes?: string;
+  setType?: SetType;
 }
 
 export interface WorkoutSessionExercise {

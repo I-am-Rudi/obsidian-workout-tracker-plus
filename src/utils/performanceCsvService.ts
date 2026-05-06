@@ -21,11 +21,12 @@ interface PerformanceCsvRow {
   completed: string;
   recordType: string;
   notes: string;
+  setType: string;
 }
 
 export class PerformanceCsvService {
   static readonly CSV_HEADER =
-    "timestamp,date,planId,planName,routineId,routineName,exerciseId,exerciseName,setIndex,previousReps,previousWeight,targetReps,targetWeight,actualReps,actualWeight,completed,recordType,notes";
+    "timestamp,date,planId,planName,routineId,routineName,exerciseId,exerciseName,setIndex,previousReps,previousWeight,targetReps,targetWeight,actualReps,actualWeight,completed,recordType,notes,setType";
   static readonly COLUMN_COUNT = PerformanceCsvService.CSV_HEADER.split(",").length;
   app: App;
   csvPath: string;
@@ -97,6 +98,7 @@ export class PerformanceCsvService {
             completed: set.completed ? "true" : "false",
             recordType: "session",
             notes: set.notes || "",
+            setType: set.setType || "default",
           })
         );
       }
@@ -137,6 +139,7 @@ export class PerformanceCsvService {
             completed: "true",
             recordType: "imported",
             notes: "",
+            setType: "",
           })
         );
       }
@@ -173,6 +176,7 @@ export class PerformanceCsvService {
             completed: "true",
             recordType: "target_update",
             notes: set.notes || "",
+            setType: set.setType || "default",
           })
         );
       }
@@ -219,9 +223,10 @@ export class PerformanceCsvService {
     }
 
     const rows: PerformanceCsvRow[] = [];
+    const oldColumnCount = this.columnCount - 1;
     for (const line of lines.slice(1)) {
       const cols = this.parseCsvLine(line);
-      if (cols.length !== this.columnCount) {
+      if (cols.length !== this.columnCount && cols.length !== oldColumnCount) {
         continue;
       }
       rows.push({
@@ -243,6 +248,7 @@ export class PerformanceCsvService {
         completed: cols[15],
         recordType: cols[16],
         notes: cols[17],
+        setType: cols.length === this.columnCount ? cols[18] : "default",
       });
     }
     return rows;
@@ -268,6 +274,7 @@ export class PerformanceCsvService {
       row.completed,
       row.recordType,
       row.notes,
+      row.setType,
     ]
       .map((value) => this.escapeCsv(value))
       .join(",");

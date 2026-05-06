@@ -1,6 +1,6 @@
 import { ItemView, Notice, Platform, Setting, WorkspaceLeaf } from "obsidian";
 import WorkoutTrackerPlugin from "../plugin";
-import { SessionFinishOptions, WorkoutSession, WorkoutSessionExercise, WorkoutSessionSet } from "../types";
+import { SessionFinishOptions, SetType, WorkoutSession, WorkoutSessionExercise, WorkoutSessionSet } from "../types";
 import { AddSessionExerciseModal } from "../modals/AddSessionExerciseModal";
 import { ExerciseNoteModal } from "../modals/ExerciseNoteModal";
 import { ConfirmModal } from "../modals/ConfirmModal";
@@ -40,6 +40,28 @@ export class WorkoutSessionView extends ItemView {
   setSession(session: WorkoutSession) {
     this.session = session;
     this.render();
+  }
+
+  private getSetDisplayLabel(sets: WorkoutSessionSet[], currentIndex: number): string {
+    const current = sets[currentIndex];
+    const isDefault = !current.setType || current.setType === "default";
+    if (isDefault) {
+      let count = 0;
+      for (let i = 0; i <= currentIndex; i++) {
+        if (!sets[i].setType || sets[i].setType === "default") count++;
+      }
+      return String(count);
+    }
+    return current.setType[0].toUpperCase();
+  }
+
+  private nextSetType(current: SetType | undefined): SetType {
+    switch (current) {
+      case "warmup": return "dropset";
+      case "dropset": return "myoreps";
+      case "myoreps": return "default";
+      default: return "warmup";
+    }
   }
 
   private render() {
@@ -232,7 +254,18 @@ export class WorkoutSessionView extends ItemView {
             cls: set.completed ? "workout-session-row-completed" : "",
           });
 
-          row.createEl("td", { text: String(set.setIndex) });
+          const setTypeCell = row.createEl("td");
+          const setType = set.setType || "default";
+          const setTypeBtn = setTypeCell.createEl("button", {
+            text: this.getSetDisplayLabel(exercise.sets, index),
+            cls: `workout-session-set-type-btn workout-session-set-type-${setType}`,
+            title: "Click to change set type",
+          });
+          setTypeBtn.onclick = () => {
+            set.setType = this.nextSetType(set.setType);
+            this.session!.hasRoutineChanges = true;
+            this.render();
+          };
           row.createEl("td", {
             text:
               set.previousWeight !== undefined || set.previousReps !== undefined
@@ -388,7 +421,19 @@ export class WorkoutSessionView extends ItemView {
 
     // Header row: set number | target | done checkbox + remove button
     const header = card.createDiv({ cls: "workout-session-set-card-header" });
-    header.createEl("span", { text: `Set ${set.setIndex}`, cls: "workout-session-set-card-set-num" });
+    const setType = set.setType || "default";
+    const isDefault = setType === "default";
+    const displayLabel = this.getSetDisplayLabel(exercise.sets, index);
+    const setTypeBtnMobile = header.createEl("button", {
+      text: isDefault ? `Set ${displayLabel}` : displayLabel,
+      cls: `workout-session-set-card-set-num workout-session-set-type-btn workout-session-set-type-${setType}`,
+      title: "Click to change set type",
+    });
+    setTypeBtnMobile.onclick = () => {
+      set.setType = this.nextSetType(set.setType);
+      this.session!.hasRoutineChanges = true;
+      onRerender();
+    };
 
     const targetText = `${set.targetWeight ?? "0"} × ${set.targetReps ?? "0"}`;
     header.createEl("span", { text: targetText, cls: "workout-session-set-card-target" });

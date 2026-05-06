@@ -254,10 +254,13 @@ export class WorkoutFileService {
     workout.exercises.forEach((exercise) => {
       content += `### ${exercise.name}\n\n`;
       if (exercise.sets && exercise.sets.length > 0) {
-        content += `| Set | Reps | Weight | Duration | Distance | Rest |\n`;
-        content += `|-----|------|--------|----------|----------|------|\n`;
+        content += `| Set | Type | Reps | Weight | Duration | Distance | Rest |\n`;
+        content += `|-----|------|------|--------|----------|----------|------|\n`;
         exercise.sets.forEach((set, index) => {
-          content += `| ${index + 1} | ${set.reps || "-"} | ${
+          const typeLabel = (set.setType && set.setType !== "default")
+            ? set.setType[0].toUpperCase()
+            : "default";
+          content += `| ${index + 1} | ${typeLabel} | ${set.reps || "-"} | ${
             set.weight || "-"
           } | ${set.duration || "-"} | ${set.distance || "-"} | ${
             set.restTime || "-"
@@ -430,16 +433,38 @@ export class WorkoutFileService {
         .map((cell) => cell.trim())
         .slice(1, -1); // Remove empty first/last
 
-      if (cells.length >= 6) {
-        const set: ExerciseSet = {};
+      // Detect 7-column format (Set | Type | Reps | Weight | Duration | Distance | Rest)
+      // vs 6-column legacy format (Set | Reps | Weight | Duration | Distance | Rest)
+      const hasTypeColumn = cells.length >= 7;
 
+      if (hasTypeColumn) {
+        const set: ExerciseSet = {};
+        const rawType = cells[1];
+        if (rawType && rawType !== "-" && rawType !== "default") {
+          const typeMap: Record<string, import("../types").SetType> = {
+            W: "warmup",
+            D: "dropset",
+            M: "myoreps",
+            warmup: "warmup",
+            dropset: "dropset",
+            myoreps: "myoreps",
+          };
+          set.setType = typeMap[rawType];
+        }
+        if (cells[2] && cells[2] !== "-") set.reps = parseInt(cells[2]);
+        if (cells[3] && cells[3] !== "-") set.weight = parseFloat(cells[3]);
+        if (cells[4] && cells[4] !== "-") set.duration = parseInt(cells[4]);
+        if (cells[5] && cells[5] !== "-") set.distance = parseFloat(cells[5]);
+        if (cells[6] && cells[6] !== "-") set.restTime = parseInt(cells[6]);
+        sets.push(set);
+      } else if (cells.length >= 6) {
+        const set: ExerciseSet = {};
         // Parse each column (Set | Reps | Weight | Duration | Distance | Rest)
         if (cells[1] && cells[1] !== "-") set.reps = parseInt(cells[1]);
         if (cells[2] && cells[2] !== "-") set.weight = parseFloat(cells[2]);
         if (cells[3] && cells[3] !== "-") set.duration = parseInt(cells[3]);
         if (cells[4] && cells[4] !== "-") set.distance = parseFloat(cells[4]);
         if (cells[5] && cells[5] !== "-") set.restTime = parseInt(cells[5]);
-
         sets.push(set);
       }
     }
