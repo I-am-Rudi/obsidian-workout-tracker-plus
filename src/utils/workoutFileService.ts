@@ -119,8 +119,8 @@ export class WorkoutFileService {
   }
 
   /**
-   * Check if a file is a workout file by checking for workoutTrackerType === "workout" in frontmatter.
-   * Routine and plan notes also carry workoutTracker: true, so we must use the type discriminator
+   * Check if a file is a workout file by checking for wj-type === "workout" in frontmatter.
+   * Routine and plan notes use different wj-type values, so we must use the type discriminator
    * to avoid mistakenly re-processing them as workout logs.
    */
   async isWorkoutFile(file: TFile): Promise<boolean> {
@@ -130,7 +130,7 @@ export class WorkoutFileService {
       if (!frontmatterMatch) return false;
 
       const frontmatter = parseYaml(frontmatterMatch[1]);
-      return frontmatter?.workoutTrackerType === "workout";
+      return frontmatter?.['wj-type'] === "workout";
     } catch (error) {
       return false;
     }
@@ -219,20 +219,19 @@ export class WorkoutFileService {
    */
   private generateWorkoutFileContent(workout: Workout): string {
     const baseFrontmatter = {
-      id: workout.id,
-      date: workout.date,
-      name: workout.name,
-      duration: workout.duration,
-      exercises: workout.exercises.map((exercise) => ({
+      'wj-id': workout.id,
+      'wj-date': workout.date,
+      'wj-name': workout.name,
+      'wj-duration': workout.duration,
+      'wj-exercises': workout.exercises.map((exercise) => ({
         name: exercise.name,
         sets: exercise.sets,
         notes: exercise.notes,
       })),
-      notes: workout.notes,
-      sourceRoutineId: workout.sourceRoutineId,
-      sourcePlanId: workout.sourcePlanId,
-      workoutTrackerType: "workout",
-      workoutTracker: true, // Tag to identify workout files
+      'wj-notes': workout.notes,
+      'wj-source-routine-id': workout.sourceRoutineId,
+      'wj-source-plan-id': workout.sourcePlanId,
+      'wj-type': "workout",
     };
 
     const templateFm = parseTemplateFrontmatter(
@@ -297,25 +296,20 @@ export class WorkoutFileService {
       const frontmatter = parseYaml(yamlContent);
 
       // Validate and construct workout object
-      // Support both legacy and new discriminator markers for backwards compatibility.
-      if (
-        !frontmatter ||
-        (!frontmatter.workoutTracker &&
-          frontmatter.workoutTrackerType !== "workout")
-      ) {
+      if (!frontmatter || frontmatter['wj-type'] !== "workout") {
         console.warn(`Invalid workout frontmatter in file: ${fallbackName}`);
         return null;
       }
 
       const workout: Workout = {
-        id: frontmatter.id || Date.now().toString(),
-        date: frontmatter.date || new Date().toISOString().split("T")[0],
-        name: frontmatter.name || fallbackName,
-        exercises: this.parseExercises(frontmatter.exercises || []),
-        duration: frontmatter.duration,
-        notes: frontmatter.notes,
-        sourceRoutineId: frontmatter.sourceRoutineId,
-        sourcePlanId: frontmatter.sourcePlanId,
+        id: frontmatter['wj-id'] || Date.now().toString(),
+        date: frontmatter['wj-date'] || new Date().toISOString().split("T")[0],
+        name: frontmatter['wj-name'] || fallbackName,
+        exercises: this.parseExercises(frontmatter['wj-exercises'] || []),
+        duration: frontmatter['wj-duration'],
+        notes: frontmatter['wj-notes'],
+        sourceRoutineId: frontmatter['wj-source-routine-id'],
+        sourcePlanId: frontmatter['wj-source-plan-id'],
       };
 
       return workout;
@@ -340,7 +334,7 @@ export class WorkoutFileService {
       if (frontmatterMatch) {
         try {
           const frontmatter = parseYaml(frontmatterMatch[1]);
-          originalId = frontmatter?.id;
+          originalId = frontmatter?.['wj-id'];
         } catch (error) {
           // Ignore frontmatter parsing errors, we'll generate a new ID
         }

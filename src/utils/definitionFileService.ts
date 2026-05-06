@@ -103,20 +103,20 @@ export class DefinitionFileService {
   async loadExerciseFromFile(file: TFile): Promise<ExerciseDefinition | null> {
     try {
       const frontmatter = await this.readFrontmatter(file);
-      if (!frontmatter || frontmatter.workoutTrackerType !== "exercise") {
+      if (!frontmatter || frontmatter['wj-type'] !== "exercise") {
         return null;
       }
       return {
-        id: frontmatter.id || file.basename,
-        name: frontmatter.name || file.basename,
-        type: frontmatter.type || "strength",
-        muscleGroups: frontmatter.muscleGroups || [],
-        notes: frontmatter.notes,
-        defaultSets: frontmatter.defaultSets,
-        defaultReps: frontmatter.defaultReps,
-        defaultWeight: frontmatter.defaultWeight,
-        defaultDuration: frontmatter.defaultDuration,
-        defaultDistance: frontmatter.defaultDistance,
+        id: frontmatter['wj-id'] || file.basename,
+        name: frontmatter['wj-name'] || file.basename,
+        type: frontmatter['wj-exercise-type'] || "strength",
+        muscleGroups: frontmatter['wj-muscle-groups'] || [],
+        notes: frontmatter['wj-notes'],
+        defaultSets: frontmatter['wj-default-sets'],
+        defaultReps: frontmatter['wj-default-reps'],
+        defaultWeight: frontmatter['wj-default-weight'],
+        defaultDuration: frontmatter['wj-default-duration'],
+        defaultDistance: frontmatter['wj-default-distance'],
         filePath: file.path,
       };
     } catch (error) {
@@ -128,16 +128,16 @@ export class DefinitionFileService {
   async loadRoutineFromFile(file: TFile): Promise<RoutineDefinition | null> {
     try {
       const frontmatter = await this.readFrontmatter(file);
-      if (!frontmatter || frontmatter.workoutTrackerType !== "routine") {
+      if (!frontmatter || frontmatter['wj-type'] !== "routine") {
         return null;
       }
       return {
-        id: frontmatter.id || file.basename,
-        name: frontmatter.name || file.basename,
-        exercises: (frontmatter.exercises || []) as RoutineExerciseEntry[],
-        estimatedDuration: frontmatter.estimatedDuration,
-        notes: frontmatter.notes,
-        planTags: frontmatter.planTags || [],
+        id: frontmatter['wj-id'] || file.basename,
+        name: frontmatter['wj-name'] || file.basename,
+        exercises: (frontmatter['wj-exercises'] || []) as RoutineExerciseEntry[],
+        estimatedDuration: frontmatter['wj-estimated-duration'],
+        notes: frontmatter['wj-notes'],
+        planTags: frontmatter['wj-plan-tags'] || [],
         filePath: file.path,
       };
     } catch (error) {
@@ -149,14 +149,14 @@ export class DefinitionFileService {
   async loadPlanFromFile(file: TFile): Promise<WorkoutPlanDefinition | null> {
     try {
       const frontmatter = await this.readFrontmatter(file);
-      if (!frontmatter || frontmatter.workoutTrackerType !== "plan") {
+      if (!frontmatter || frontmatter['wj-type'] !== "plan") {
         return null;
       }
       return {
-        id: frontmatter.id || file.basename,
-        name: frontmatter.name || file.basename,
-        routines: (frontmatter.routines || []) as WorkoutPlanRoutineEntry[],
-        notes: frontmatter.notes,
+        id: frontmatter['wj-id'] || file.basename,
+        name: frontmatter['wj-name'] || file.basename,
+        routines: (frontmatter['wj-routines'] || []) as WorkoutPlanRoutineEntry[],
+        notes: frontmatter['wj-notes'],
         filePath: file.path,
       };
     } catch (error) {
@@ -295,18 +295,17 @@ export class DefinitionFileService {
 
   private renderExerciseDefinition(def: ExerciseDefinition): string {
     const baseFrontmatter = {
-      workoutTrackerType: "exercise",
-      id: def.id,
-      name: def.name,
-      type: def.type,
-      muscleGroups: def.muscleGroups,
-      defaultSets: def.defaultSets,
-      defaultReps: def.defaultReps,
-      defaultWeight: def.defaultWeight,
-      defaultDuration: def.defaultDuration,
-      defaultDistance: def.defaultDistance,
-      notes: def.notes,
-      workoutTracker: true,
+      'wj-type': "exercise",
+      'wj-id': def.id,
+      'wj-name': def.name,
+      'wj-exercise-type': def.type,
+      'wj-muscle-groups': def.muscleGroups,
+      'wj-default-sets': def.defaultSets,
+      'wj-default-reps': def.defaultReps,
+      'wj-default-weight': def.defaultWeight,
+      'wj-default-duration': def.defaultDuration,
+      'wj-default-distance': def.defaultDistance,
+      'wj-notes': def.notes,
     };
     const templateFm = parseTemplateFrontmatter(
       this.settings.noteTemplates?.exercise?.frontmatter
@@ -319,14 +318,13 @@ export class DefinitionFileService {
 
   private renderRoutineDefinition(def: RoutineDefinition): string {
     const baseFrontmatter = {
-      workoutTrackerType: "routine",
-      id: def.id,
-      name: def.name,
-      exercises: def.exercises,
-      estimatedDuration: def.estimatedDuration,
-      notes: def.notes,
-      planTags: def.planTags || [],
-      workoutTracker: true,
+      'wj-type': "routine",
+      'wj-id': def.id,
+      'wj-name': def.name,
+      'wj-exercises': def.exercises,
+      'wj-estimated-duration': def.estimatedDuration,
+      'wj-notes': def.notes,
+      'wj-plan-tags': def.planTags || [],
     };
     const templateFm = parseTemplateFrontmatter(
       this.settings.noteTemplates?.routine?.frontmatter
@@ -345,12 +343,11 @@ export class DefinitionFileService {
 
   private renderPlanDefinition(def: WorkoutPlanDefinition): string {
     const baseFrontmatter = {
-      workoutTrackerType: "plan",
-      id: def.id,
-      name: def.name,
-      routines: def.routines,
-      notes: def.notes,
-      workoutTracker: true,
+      'wj-type': "plan",
+      'wj-id': def.id,
+      'wj-name': def.name,
+      'wj-routines': def.routines,
+      'wj-notes': def.notes,
     };
     const templateFm = parseTemplateFrontmatter(
       this.settings.noteTemplates?.plan?.frontmatter

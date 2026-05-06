@@ -21,7 +21,7 @@ export class NoteContentTemplatesPage {
 
     containerEl.createEl("h2", { text: "Note Content Templates" });
     containerEl.createEl("p", {
-      text: "Extra frontmatter properties (YAML) and body text appended to each generated note type. Plugin-managed properties (id, name, type, etc.) always take precedence over template frontmatter.",
+      text: "Extra frontmatter properties (YAML) and body text appended to each generated note type. Plugin-managed properties (wj-id, wj-name, wj-type, etc.) always take precedence over template frontmatter.",
       cls: "setting-item-description",
     });
 
