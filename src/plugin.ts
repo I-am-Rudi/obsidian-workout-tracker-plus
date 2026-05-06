@@ -229,6 +229,20 @@ export default class WorkoutTrackerPlugin extends Plugin {
     });
 
     this.addCommand({
+      id: "create-routine-from-workout",
+      name: "Create Routine from Current Workout",
+      checkCallback: (checking: boolean) => {
+        const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (markdownView && markdownView.file) {
+          if (!checking) {
+            this.createRoutineFromWorkoutFile(markdownView.file);
+          }
+          return true;
+        }
+      },
+    });
+
+    this.addCommand({
       id: "import-from-strong",
       name: "Import from Strong App",
       callback: () => new StrongImportModal(this.app, this).open(),
@@ -398,6 +412,15 @@ export default class WorkoutTrackerPlugin extends Plugin {
     new Notice("Workout finished and saved.");
   }
 
+  async cancelActiveSession(): Promise<void> {
+    this.activeSession = null;
+    if (this.sessionLeaf) {
+      await this.sessionLeaf.setViewState({ type: "empty" });
+      this.sessionLeaf = null;
+    }
+    new Notice("Workout session cancelled.");
+  }
+
   async startWorkoutFromCurrentNote(): Promise<void> {
     const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView?.file) {
@@ -559,6 +582,28 @@ export default class WorkoutTrackerPlugin extends Plugin {
     new Notice(`Routine note created: ${name}`);
   }
 
+  private async createRoutineFromWorkoutFile(file: TFile): Promise<void> {
+    const workout = await this.fileService.loadWorkout(file);
+    if (!workout) {
+      new Notice("Current file is not a valid workout file.");
+      return;
+    }
+    const name = await this.prompt("Routine name", workout.name);
+    if (!name) return;
+    const routine: RoutineDefinition = {
+      id: this.createIdFromName(name),
+      name,
+      exercises: workout.exercises.map((exercise) => ({
+        exerciseId: this.createIdFromName(exercise.name),
+        exerciseName: exercise.name,
+      sets: exercise.sets.map((set) => ({ ...set })),
+      })),
+      estimatedDuration: workout.duration,
+    };
+    await this.definitionService.createRoutineDefinition(routine);
+    new Notice(`Routine created: ${name}`);
+  }
+
   private async createPlanNoteFromPrompt(): Promise<void> {
     const name = await this.prompt("Workout plan name");
     if (!name) return;
@@ -571,11 +616,11 @@ export default class WorkoutTrackerPlugin extends Plugin {
     new Notice(`Workout plan note created: ${name}`);
   }
 
-  private prompt(label: string): Promise<string | null> {
+  private prompt(label: string, defaultValue?: string): Promise<string | null> {
     return new Promise((resolve) => {
       new InputPromptModal(this.app, label, "Enter value", (value) => {
         resolve(value);
-      }).open();
+      }, defaultValue).open();
     });
   }
 

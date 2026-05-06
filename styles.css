@@ -341,6 +341,11 @@
 .workout-session-card-header h3 {
     margin: 0;
     flex: 1;
+    min-width: 0;
+    font-size: calc(var(--h3-size, 1.1em) * 0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .workout-session-exercise-controls {
@@ -425,6 +430,50 @@
     color: var(--text-muted);
     text-align: center;
     padding: 16px;
+}
+
+/* Routine template modal – exercise picker */
+.wt-template-exercises-label {
+    margin: 12px 0 4px 0;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.wt-template-selected-exercises {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+    padding: 4px 0;
+    margin-bottom: 4px;
+}
+
+.wt-template-exercise-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-radius: 14px;
+    padding: 3px 10px 3px 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.wt-template-exercise-chip-remove {
+    background: none;
+    border: none;
+    color: var(--text-on-accent);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    opacity: 0.75;
+    line-height: 1;
+}
+
+.wt-template-exercise-chip-remove:hover {
+    opacity: 1;
 }
 
 /* Quick-create button shown when no exercises match the search */
@@ -540,7 +589,7 @@
     border: none;
     padding: 0;
     margin: 0;
-    font-size: var(--h3-size, 1.1em);
+    font-size: calc(var(--h3-size, 1.1em) * 0.5);
     font-weight: 600;
     color: var(--text-normal);
     cursor: pointer;
@@ -558,16 +607,6 @@
 .workout-session-exercise-name-btn:hover {
     color: var(--interactive-accent);
     text-decoration: underline;
-}
-
-/* h3 exercise name (no link) should also shrink on small screens */
-.workout-session-card-header h3 {
-    margin: 0;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 /* Timer button: small ⏱ Xs button between name and controls */
