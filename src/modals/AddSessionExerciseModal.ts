@@ -92,7 +92,10 @@ export class AddSessionExerciseModal extends Modal {
       defaultSets: DEFAULT_NUM_SETS,
       defaultReps: 8,
     };
-    await this.plugin.definitionService.createExerciseDefinition(def);
+    const file = await this.plugin.definitionService.createExerciseDefinition(def);
+    if (file) {
+      def.filePath = file.path;
+    }
     new Notice(`Exercise note created: ${name}`);
     this.onAdd(this.buildSessionExercise(def));
     this.close();
@@ -116,6 +119,7 @@ export class AddSessionExerciseModal extends Modal {
       sets,
       completed: false,
       exerciseNotes: ex.notes || undefined,
+      exerciseFilePath: ex.filePath,
     };
   }
 
