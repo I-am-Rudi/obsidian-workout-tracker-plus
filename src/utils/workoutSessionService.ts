@@ -168,7 +168,7 @@ export class WorkoutSessionService {
           duration: fromSession.duration ?? existing.duration,
           distance: fromSession.distance ?? existing.distance,
           restTime: fromSession.restTime ?? existing.restTime,
-          setType: fromSession?.setType ?? existing?.setType,
+          setType: fromSession.setType ?? existing.setType,
         });
       }
       return sets;
