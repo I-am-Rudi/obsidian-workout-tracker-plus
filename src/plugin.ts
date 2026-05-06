@@ -412,6 +412,15 @@ export default class WorkoutTrackerPlugin extends Plugin {
     new Notice("Workout finished and saved.");
   }
 
+  async cancelActiveSession(): Promise<void> {
+    this.activeSession = null;
+    if (this.sessionLeaf) {
+      await this.sessionLeaf.setViewState({ type: "empty" });
+      this.sessionLeaf = null;
+    }
+    new Notice("Workout session cancelled.");
+  }
+
   async startWorkoutFromCurrentNote(): Promise<void> {
     const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView?.file) {

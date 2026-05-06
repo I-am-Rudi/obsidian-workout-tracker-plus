@@ -269,10 +269,8 @@ export class WorkoutSessionView extends ItemView {
           })
       )
       .addButton((btn) =>
-        btn.setButtonText("Cancel Session").setWarning().onClick(() => {
-          this.plugin.activeSession = null;
-          this.render();
-          new Notice("Workout session cancelled.");
+        btn.setButtonText("Cancel Session").setWarning().onClick(async () => {
+          await this.plugin.cancelActiveSession();
         })
       );
 
