@@ -102,7 +102,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "create-new-workout",
-      name: "Create New Workout",
+      name: "Create new workout",
       callback: () => {
         new WorkoutModal(this.app, this).open();
       },
@@ -110,7 +110,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "insert-exercise-template",
-      name: "Insert Exercise Template",
+      name: "Insert exercise template",
       editorCallback: (
         editor: Editor,
         context: MarkdownView | MarkdownFileInfo
@@ -125,7 +125,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "quick-log-workout",
-      name: "Quick Log Workout",
+      name: "Quick log workout",
       checkCallback: (checking: boolean) => {
         const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (markdownView) {
@@ -139,7 +139,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "view-workout-statistics",
-      name: "View Workout Statistics",
+      name: "View workout statistics",
       callback: () => {
         new WorkoutStatsModal(this.app, this).open();
       },
@@ -147,7 +147,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "edit-current-workout",
-      name: "Edit Current Workout",
+      name: "Edit current workout",
       checkCallback: (checking: boolean) => {
         const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (markdownView && markdownView.file) {
@@ -161,7 +161,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "start-workout-from-routine",
-      name: "Start Workout From Routine",
+      name: "Start workout from routine",
       callback: async () => {
         const routines = await this.definitionService.loadRoutineDefinitions();
         new RoutineSelectionModal(this.app, routines, async (routine) => {
@@ -172,7 +172,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "start-workout-from-plan",
-      name: "Start Workout From Plan",
+      name: "Start workout from plan",
       callback: async () => {
         const [plans, routines] = await Promise.all([
           this.definitionService.loadPlanDefinitions(),
@@ -186,7 +186,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "start-workout-from-current-note",
-      name: "Start Workout From Current Note",
+      name: "Start workout from current note",
       callback: async () => {
         await this.startWorkoutFromCurrentNote();
       },
@@ -194,7 +194,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "open-workout-session-popout",
-      name: "Open Active Workout Session in Popout",
+      name: "Open active workout session in popout",
       callback: async () => {
         if (!this.activeSession) {
           new Notice("No active session. Start one from a routine or plan first.");
@@ -206,7 +206,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "create-exercise-note",
-      name: "Create Exercise Note",
+      name: "Create exercise note",
       callback: async () => {
         await this.createExerciseNoteFromPrompt();
       },
@@ -214,7 +214,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "create-routine-note",
-      name: "Create Routine Note",
+      name: "Create routine note",
       callback: async () => {
         await this.createRoutineNoteFromPrompt();
       },
@@ -222,7 +222,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "create-workout-plan-note",
-      name: "Create Workout Plan Note",
+      name: "Create workout plan note",
       callback: async () => {
         await this.createPlanNoteFromPrompt();
       },
@@ -230,7 +230,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "create-routine-from-workout",
-      name: "Create Routine from Current Workout",
+      name: "Create routine from current workout",
       checkCallback: (checking: boolean) => {
         const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (markdownView && markdownView.file) {
@@ -244,13 +244,13 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     this.addCommand({
       id: "import-from-strong",
-      name: "Import from Strong App",
+      name: "Import from Strong app",
       callback: () => new StrongImportModal(this.app, this).open(),
     });
 
     this.addCommand({
       id: "migrate-settings-templates-to-notes",
-      name: "Migrate Settings Templates to Notes",
+      name: "Migrate settings templates to notes",
       callback: async () => {
         await this.migrateTemplatesToNotes();
       },
@@ -265,7 +265,6 @@ export default class WorkoutTrackerPlugin extends Plugin {
     }
     this.syncTimeouts.forEach((timeout) => clearTimeout(timeout));
     this.syncTimeouts.clear();
-    this.app.workspace.detachLeavesOfType(WORKOUT_SESSION_VIEW_TYPE);
   }
 
   async loadSettings() {
@@ -542,7 +541,6 @@ export default class WorkoutTrackerPlugin extends Plugin {
       try {
         leaf = this.app.workspace.getLeaf("window");
       } catch (error) {
-        console.debug("Workout Tracker: popout unavailable, using fallback leaf.", error);
         leaf = null;
       }
     }
@@ -656,10 +654,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
         if (!isWorkout) {
           return;
         }
-        const wasUpdated = await this.fileService.syncFrontmatterWithContent(file);
-        if (wasUpdated) {
-          console.log(`Auto-synced frontmatter for: ${file.path}`);
-        }
+        await this.fileService.syncFrontmatterWithContent(file);
       } catch (error) {
         console.error(`Error syncing frontmatter for ${file.path}:`, error);
       } finally {

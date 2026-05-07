@@ -40,10 +40,10 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Workout Journal Settings" });
+    new Setting(containerEl).setName("Workout Journal settings").setHeading();
 
     new Setting(containerEl)
-      .setName("Default Workout Folder")
+      .setName("Default workout folder")
       .setDesc("Folder where workout files will be created")
       .addText((text) =>
         text
@@ -56,7 +56,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Exercise Library Folder")
+      .setName("Exercise library folder")
       .setDesc("Folder containing exercise definition notes")
       .addText((text) =>
         text
@@ -69,7 +69,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Routines Folder")
+      .setName("Routines folder")
       .setDesc("Folder containing routine definition notes")
       .addText((text) =>
         text
@@ -82,7 +82,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Workout Plans Folder")
+      .setName("Workout plans folder")
       .setDesc("Folder containing workout plan definition notes")
       .addText((text) =>
         text
@@ -95,7 +95,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Performance CSV Path")
+      .setName("Performance CSV path")
       .setDesc("CSV file used for previous values and target progression")
       .addText((text) =>
         text
@@ -108,7 +108,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Enable Exercise Autocomplete")
+      .setName("Enable exercise autocomplete")
       .setDesc("Show exercise suggestions when typing")
       .addToggle((toggle) =>
         toggle
@@ -120,7 +120,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Auto-sync Frontmatter")
+      .setName("Auto-sync frontmatter")
       .setDesc(
         "Automatically sync frontmatter when workout files are manually edited"
       )
@@ -134,7 +134,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Auto-sync Delay")
+      .setName("Auto-sync delay")
       .setDesc(
         "Wait time (in milliseconds) after stopping typing before syncing frontmatter"
       )
@@ -153,7 +153,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Date Format")
+      .setName("Date format")
       .setDesc("Format for workout dates")
       .addText((text) =>
         text
@@ -166,7 +166,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Weight Unit")
+      .setName("Weight unit")
       .setDesc("Global weight unit used across logging and stats")
       .addDropdown((dropdown) =>
         dropdown
@@ -180,7 +180,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Default Rest Timer")
+      .setName("Default rest timer")
       .setDesc(
         "Rest timer duration in seconds started automatically when a set is checked off (0 to disable)"
       )
@@ -197,36 +197,36 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
           })
       );
 
-    containerEl.createEl("h3", { text: "Migration" });
+    new Setting(containerEl).setName("Migration").setHeading();
     new Setting(containerEl)
-      .setName("Template Migration Status")
+      .setName("Template migration status")
       .setDesc(
         this.plugin.settings.migration.completed
           ? `Completed at ${this.plugin.settings.migration.migratedAt}. Exercises: ${this.plugin.settings.migration.exerciseCount}, Routines: ${this.plugin.settings.migration.routineCount}.`
           : "Not yet migrated."
       )
       .addButton((btn) =>
-        btn.setButtonText("Migrate Templates to Notes").onClick(async () => {
+        btn.setButtonText("Migrate templates to notes").onClick(async () => {
           await this.plugin.migrateTemplatesToNotes();
           this.display();
         })
       );
 
-    containerEl.createEl("h3", { text: "Import" });
+    new Setting(containerEl).setName("Import").setHeading();
     new Setting(containerEl)
-      .setName("Import from Strong App")
+      .setName("Import from Strong app")
       .setDesc("Import workout history exported from the Strong app (workouts.csv).")
       .addButton((btn) =>
         btn
-          .setButtonText("Import from Strong App")
+          .setButtonText("Import from Strong app")
           .onClick(() => new StrongImportModal(this.app, this.plugin).open())
       );
 
-    containerEl.createEl("h3", { text: "Library" });
+    new Setting(containerEl).setName("Library").setHeading();
 
     const exerciseCount = this.plugin.settings.exerciseTemplates.length;
     new Setting(containerEl)
-      .setName("Exercise Templates")
+      .setName("Exercise templates")
       .setDesc(
         `${exerciseCount} template${exerciseCount !== 1 ? "s" : ""} defined (legacy settings-based)`
       )
@@ -239,7 +239,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
 
     const routineCount = this.plugin.settings.workoutTemplates.length;
     new Setting(containerEl)
-      .setName("Routine Templates")
+      .setName("Routine templates")
       .setDesc(
         `${routineCount} template${routineCount !== 1 ? "s" : ""} defined (legacy settings-based)`
       )
@@ -251,7 +251,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Workout Plans")
+      .setName("Workout plans")
       .setDesc("Create and manage note-based workout plans built from routines")
       .addButton((btn) =>
         btn.setButtonText("Manage →").onClick(() => {
@@ -261,7 +261,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Note Content Templates")
+      .setName("Note content templates")
       .setDesc("Extra frontmatter and body text appended to each generated note type")
       .addButton((btn) =>
         btn.setButtonText("Manage →").onClick(() => {
