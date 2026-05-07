@@ -548,11 +548,29 @@
     flex: 0 0 auto;
     font-size: 12px;
     line-height: 1.4;
+    margin-top: 1px;
 }
 
-.workout-session-routine-note-text {
+.workout-session-routine-note-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 1.4em;
+    border: none;
+    background: transparent;
+    color: var(--text-normal);
+    font-size: 13px;
+    line-height: 1.35;
+    padding: 0;
+    margin: 0;
+    resize: none;
+    overflow: hidden;
     white-space: pre-wrap;
     word-break: break-word;
+    font-family: inherit;
+}
+
+.workout-session-routine-note-input:focus {
+    outline: none;
 }
 
 /* Mobile layout: set cards (480px and below) */
