@@ -39,8 +39,11 @@ export class DefinitionFileService {
   async createExerciseDefinition(def: ExerciseDefinition): Promise<TFile | null> {
     await this.ensureFolders();
     const fileName = this.createSafeFileName(def.name, "exercise-note");
-    const folder = this.normalizeUserPath(this.settings.exerciseLibraryFolder);
-    const path = folder ? `${folder}/${fileName}.md` : `${fileName}.md`;
+    const folder = this.requireConfiguredFolder(
+      this.settings.exerciseLibraryFolder,
+      "Exercise library folder"
+    );
+    const path = `${folder}/${fileName}.md`;
     const existing = this.app.vault.getAbstractFileByPath(path);
     const content = this.renderExerciseDefinition(def);
     if (existing instanceof TFile) {
@@ -53,8 +56,11 @@ export class DefinitionFileService {
   async createRoutineDefinition(def: RoutineDefinition): Promise<TFile | null> {
     await this.ensureFolders();
     const fileName = this.createSafeFileName(def.name, "routine-note");
-    const folder = this.normalizeUserPath(this.settings.routinesFolder);
-    const path = folder ? `${folder}/${fileName}.md` : `${fileName}.md`;
+    const folder = this.requireConfiguredFolder(
+      this.settings.routinesFolder,
+      "Routines folder"
+    );
+    const path = `${folder}/${fileName}.md`;
     const existing = this.app.vault.getAbstractFileByPath(path);
     const content = this.renderRoutineDefinition(def);
     if (existing instanceof TFile) {
@@ -69,8 +75,11 @@ export class DefinitionFileService {
   ): Promise<TFile | null> {
     await this.ensureFolders();
     const fileName = this.createSafeFileName(def.name, "plan-note");
-    const folder = this.normalizeUserPath(this.settings.workoutPlansFolder);
-    const path = folder ? `${folder}/${fileName}.md` : `${fileName}.md`;
+    const folder = this.requireConfiguredFolder(
+      this.settings.workoutPlansFolder,
+      "Workout plans folder"
+    );
+    const path = `${folder}/${fileName}.md`;
     const existing = this.app.vault.getAbstractFileByPath(path);
     const content = this.renderPlanDefinition(def);
     if (existing instanceof TFile) {
@@ -452,5 +461,13 @@ export class DefinitionFileService {
   private normalizeUserPath(path: string): string {
     const trimmed = path.trim();
     return trimmed ? normalizePath(trimmed) : "";
+  }
+
+  private requireConfiguredFolder(path: string, label: string): string {
+    const normalized = this.normalizeUserPath(path);
+    if (!normalized) {
+      throw new Error(`Workout Tracker: ${label} is not configured.`);
+    }
+    return normalized;
   }
 }
