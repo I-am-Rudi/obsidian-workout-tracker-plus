@@ -409,6 +409,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
     if (options.storeNewTargets) {
       await this.performanceCsvService.appendTargetUpdate(sessionToSave);
     }
+    await this.storeLastPerformedValues(sessionToSave);
 
     if (
       sessionToSave.routineId &&
@@ -477,6 +478,8 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     const exercise = await this.definitionService.loadExerciseFromFile(file);
     if (exercise) {
+      const reps = exercise.lastPerformedReps ?? exercise.defaultReps;
+      const weight = exercise.lastPerformedWeight ?? exercise.defaultWeight;
       const routineDef: RoutineDefinition = {
         id: `single-${exercise.id}`,
         name: exercise.name,
@@ -489,8 +492,8 @@ export default class WorkoutTrackerPlugin extends Plugin {
                 exercise.defaultSets ||
                 WorkoutTrackerPlugin.DEFAULT_SINGLE_EXERCISE_SETS,
             }).map(() => ({
-              reps: exercise.defaultReps,
-              weight: exercise.defaultWeight,
+              reps,
+              weight,
               duration: exercise.defaultDuration,
               distance: exercise.defaultDistance,
             })),
@@ -611,6 +614,41 @@ export default class WorkoutTrackerPlugin extends Plugin {
     };
     await this.definitionService.createRoutineDefinition(routine);
     new Notice(`Routine note created: ${name}`);
+  }
+
+  private async storeLastPerformedValues(session: WorkoutSession): Promise<void> {
+    const definitions = await this.definitionService.loadExerciseDefinitions();
+    const byId = new Map(definitions.map((definition) => [definition.id, definition]));
+    const byName = new Map(definitions.map((definition) => [definition.name, definition]));
+
+    for (const exercise of session.exercises) {
+      const definition = byId.get(exercise.exerciseId) || byName.get(exercise.exerciseName);
+      if (!definition) {
+        continue;
+      }
+
+      const latestSet = [...exercise.sets]
+        .reverse()
+        .find((set) => set.completed && (set.actualReps !== undefined || set.actualWeight !== undefined));
+      if (!latestSet) {
+        continue;
+      }
+
+      const nextReps = latestSet.actualReps;
+      const nextWeight = latestSet.actualWeight;
+      if (
+        definition.lastPerformedReps === nextReps &&
+        definition.lastPerformedWeight === nextWeight
+      ) {
+        continue;
+      }
+
+      await this.definitionService.createExerciseDefinition({
+        ...definition,
+        lastPerformedReps: nextReps,
+        lastPerformedWeight: nextWeight,
+      });
+    }
   }
 
   private async createRoutineFromWorkoutFile(file: TFile): Promise<void> {

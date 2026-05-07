@@ -30,22 +30,27 @@ export class QuickWorkoutModal extends Modal {
 	}
 
 	async createWorkoutFromTemplate(template: WorkoutTemplate) {
+		const definitions = await this.plugin.definitionService.loadExerciseDefinitions();
+		const definitionByName = new Map(definitions.map((definition) => [definition.name, definition]));
 		const workout: Workout = {
 			id: Date.now().toString(),
 			date: new Date().toISOString().split('T')[0],
 			name: template.name,
 			exercises: template.exercises.map(exerciseName => {
 				const exerciseTemplate = this.plugin.settings.exerciseTemplates.find(t => t.name === exerciseName);
+				const definition = definitionByName.get(exerciseName);
 				const exercise: Exercise = {
 					name: exerciseName,
 					sets: []
 				};
 				
 				if (exerciseTemplate && exerciseTemplate.defaultSets) {
+					const reps = definition?.lastPerformedReps ?? exerciseTemplate.defaultReps;
+					const weight = definition?.lastPerformedWeight ?? exerciseTemplate.defaultWeight;
 					for (let i = 0; i < exerciseTemplate.defaultSets; i++) {
 						exercise.sets.push({
-							reps: exerciseTemplate.defaultReps,
-							weight: exerciseTemplate.defaultWeight,
+							reps,
+							weight,
 							duration: exerciseTemplate.defaultDuration
 						});
 					}

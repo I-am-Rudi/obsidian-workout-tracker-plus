@@ -96,6 +96,8 @@ export interface ExerciseDefinition {
   defaultSets?: number;
   defaultReps?: number;
   defaultWeight?: number;
+  lastPerformedReps?: number;
+  lastPerformedWeight?: number;
   defaultDuration?: number;
   defaultDistance?: number;
   filePath?: string;
