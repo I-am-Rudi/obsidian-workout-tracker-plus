@@ -247,6 +247,27 @@ export class WorkoutSessionView extends ItemView {
         this.stopRestTimer(exerciseIndex, timerDisplay);
       });
 
+      // Routine-specific exercise notes shown inline in the active session
+      const routineNoteBanner = card.createDiv({ cls: "workout-session-routine-note-banner" });
+      routineNoteBanner.createSpan({ text: "📝", cls: "workout-session-routine-note-icon" });
+      const routineNoteInput = routineNoteBanner.createEl("textarea", {
+        cls: "workout-session-routine-note-input",
+      });
+      routineNoteInput.value = exercise.notes || "";
+      routineNoteInput.placeholder = "Add routine note…";
+
+      const resizeRoutineNoteInput = () => {
+        routineNoteInput.style.height = "auto";
+        routineNoteInput.style.height = `${routineNoteInput.scrollHeight}px`;
+      };
+      resizeRoutineNoteInput();
+
+      routineNoteInput.addEventListener("input", () => {
+        resizeRoutineNoteInput();
+        exercise.notes = routineNoteInput.value || undefined;
+        session.hasRoutineChanges = true;
+      });
+
       // Exercise-level notes (global, from the exercise definition) – read-only
       if (exercise.exerciseNotes) {
         const noteBlock = card.createDiv({ cls: "workout-session-exercise-notes" });
@@ -366,19 +387,6 @@ export class WorkoutSessionView extends ItemView {
         })
       );
 
-      // Routine-specific exercise notes (editable)
-      new Setting(card)
-        .setName("Routine notes")
-        .setClass("workout-session-routine-notes-setting")
-        .addTextArea((text) =>
-          text
-            .setPlaceholder("Notes for this exercise in this routine…")
-            .setValue(exercise.notes || "")
-            .onChange((value) => {
-              exercise.notes = value || undefined;
-              session.hasRoutineChanges = true;
-            })
-        );
     });
 
     // Add Exercise button
