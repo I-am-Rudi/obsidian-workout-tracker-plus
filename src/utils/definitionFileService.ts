@@ -467,7 +467,7 @@ export class DefinitionFileService {
     const normalized = this.normalizeUserPath(path);
     if (!normalized) {
       throw new Error(
-        `Workout Tracker: ${label} is not configured. Please configure it in plugin settings.`
+        `Workout Tracker: ${label} must be configured in plugin settings before creating notes.`
       );
     }
     return normalized;
