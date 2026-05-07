@@ -103,10 +103,12 @@ export class WorkoutSessionView extends ItemView {
           new ExerciseNoteModal(this.app, exercise.exerciseFilePath!, exercise.exerciseName).open();
         };
       } else {
-        cardHeader.createDiv({
+        const exerciseNameEl = cardHeader.createDiv({
           text: exercise.exerciseName,
           cls: "workout-session-exercise-name",
         });
+        exerciseNameEl.setAttr("role", "heading");
+        exerciseNameEl.setAttr("aria-level", "3");
       }
 
       // Timer button – shows current duration and toggles the inline editor
