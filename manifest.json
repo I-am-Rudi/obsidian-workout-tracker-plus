@@ -3,7 +3,7 @@
 	"name": "Workout Journal",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Track your workouts, exercises, and fitness progress in Obsidian",
+	"description": "Track your workouts, exercises, and fitness progress. Create repeatable workout templates, structure in workout plans and log in an interactive sessions.",
 	"author": "I-am-Rudi",
 	"authorUrl": "https://github.com/I-am-Rudi",
 	"isDesktopOnly": false
