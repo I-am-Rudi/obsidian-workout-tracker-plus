@@ -482,10 +482,37 @@ export class WorkoutFileService {
           : {};
       return {
         name: typeof parsed.name === "string" ? parsed.name : "Unknown Exercise",
-        sets: Array.isArray(parsed.sets) ? (parsed.sets as ExerciseSet[]) : [],
+        sets: this.parseExerciseSets(parsed.sets),
         notes: typeof parsed.notes === "string" ? parsed.notes : undefined,
       };
     });
+  }
+
+  private parseExerciseSets(setsData: unknown): ExerciseSet[] {
+    if (!Array.isArray(setsData)) return [];
+    return setsData
+      .map((setData) => this.parseExerciseSet(setData))
+      .filter((set): set is ExerciseSet => set !== null);
+  }
+
+  private parseExerciseSet(setData: unknown): ExerciseSet | null {
+    if (!setData || typeof setData !== "object") return null;
+    const parsed = setData as Record<string, unknown>;
+    const setType =
+      parsed.setType === "default" ||
+      parsed.setType === "warmup" ||
+      parsed.setType === "dropset" ||
+      parsed.setType === "myoreps"
+        ? parsed.setType
+        : undefined;
+    return {
+      reps: typeof parsed.reps === "number" ? parsed.reps : undefined,
+      weight: typeof parsed.weight === "number" ? parsed.weight : undefined,
+      duration: typeof parsed.duration === "number" ? parsed.duration : undefined,
+      distance: typeof parsed.distance === "number" ? parsed.distance : undefined,
+      restTime: typeof parsed.restTime === "number" ? parsed.restTime : undefined,
+      setType,
+    };
   }
 
   private normalizeUserPath(path: string): string {

@@ -10,6 +10,7 @@ import {
   ExerciseDefinition,
   RoutineDefinition,
   RoutineExerciseEntry,
+  RoutineExerciseSetTarget,
   WorkoutPlanDefinition,
   WorkoutPlanRoutineEntry,
   WorkoutTrackerSettings,
@@ -152,9 +153,7 @@ export class DefinitionFileService {
       return {
         id: this.asString(frontmatter['wj-id']) || file.basename,
         name: this.asString(frontmatter['wj-name']) || file.basename,
-        exercises: Array.isArray(frontmatter['wj-exercises'])
-          ? (frontmatter['wj-exercises'] as RoutineExerciseEntry[])
-          : [],
+        exercises: this.asRoutineExerciseEntries(frontmatter['wj-exercises']),
         estimatedDuration: this.asNumber(frontmatter['wj-estimated-duration']),
         notes: this.asString(frontmatter['wj-notes']),
         planTags: this.asStringArray(frontmatter['wj-plan-tags']),
@@ -175,9 +174,7 @@ export class DefinitionFileService {
       return {
         id: this.asString(frontmatter['wj-id']) || file.basename,
         name: this.asString(frontmatter['wj-name']) || file.basename,
-        routines: Array.isArray(frontmatter['wj-routines'])
-          ? (frontmatter['wj-routines'] as WorkoutPlanRoutineEntry[])
-          : [],
+        routines: this.asWorkoutPlanRoutineEntries(frontmatter['wj-routines']),
         notes: this.asString(frontmatter['wj-notes']),
         filePath: file.path,
       };
@@ -342,7 +339,84 @@ export class DefinitionFileService {
   private asExerciseType(
     value: unknown
   ): ExerciseDefinition["type"] | undefined {
-    return value === "strength" || value === "cardio" ? value : undefined;
+    return value === "strength" ||
+      value === "cardio" ||
+      value === "flexibility" ||
+      value === "other"
+      ? value
+      : undefined;
+  }
+
+  private asRoutineExerciseEntries(value: unknown): RoutineExerciseEntry[] {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((entry) => this.asRoutineExerciseEntry(entry))
+      .filter((entry): entry is RoutineExerciseEntry => entry !== null);
+  }
+
+  private asRoutineExerciseEntry(value: unknown): RoutineExerciseEntry | null {
+    if (!value || typeof value !== "object") return null;
+    const parsed = value as Record<string, unknown>;
+    const exerciseId = this.asString(parsed.exerciseId);
+    const exerciseName = this.asString(parsed.exerciseName);
+    if (!exerciseId || !exerciseName) return null;
+
+    return {
+      exerciseId,
+      exerciseName,
+      exerciseLink: this.asString(parsed.exerciseLink),
+      sets: this.asRoutineExerciseSetTargets(parsed.sets),
+      notes: this.asString(parsed.notes),
+    };
+  }
+
+  private asRoutineExerciseSetTargets(value: unknown): RoutineExerciseSetTarget[] {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((set) => this.asRoutineExerciseSetTarget(set))
+      .filter((set): set is RoutineExerciseSetTarget => set !== null);
+  }
+
+  private asRoutineExerciseSetTarget(value: unknown): RoutineExerciseSetTarget | null {
+    if (!value || typeof value !== "object") return null;
+    const parsed = value as Record<string, unknown>;
+    const setType =
+      parsed.setType === "default" ||
+      parsed.setType === "warmup" ||
+      parsed.setType === "dropset" ||
+      parsed.setType === "myoreps"
+        ? parsed.setType
+        : undefined;
+    return {
+      reps: this.asNumber(parsed.reps),
+      weight: this.asNumber(parsed.weight),
+      duration: this.asNumber(parsed.duration),
+      distance: this.asNumber(parsed.distance),
+      restTime: this.asNumber(parsed.restTime),
+      setType,
+    };
+  }
+
+  private asWorkoutPlanRoutineEntries(value: unknown): WorkoutPlanRoutineEntry[] {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((entry) => this.asWorkoutPlanRoutineEntry(entry))
+      .filter((entry): entry is WorkoutPlanRoutineEntry => entry !== null);
+  }
+
+  private asWorkoutPlanRoutineEntry(value: unknown): WorkoutPlanRoutineEntry | null {
+    if (!value || typeof value !== "object") return null;
+    const parsed = value as Record<string, unknown>;
+    const routineId = this.asString(parsed.routineId);
+    const routineName = this.asString(parsed.routineName);
+    if (!routineId || !routineName) return null;
+    return {
+      routineId,
+      routineName,
+      routineLink: this.asString(parsed.routineLink),
+      day: this.asString(parsed.day),
+      notes: this.asString(parsed.notes),
+    };
   }
 
   private renderExerciseDefinition(def: ExerciseDefinition): string {
