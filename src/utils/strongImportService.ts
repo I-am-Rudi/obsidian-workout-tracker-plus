@@ -233,7 +233,7 @@ export function deriveExerciseDefsFromWorkouts(
   const latestDateByName = new Map<string, string>();
   const defs: ExerciseDefinition[] = [];
 
-  const latestSetValues = (sets: { reps?: number; weight?: number }[]) => {
+  const lastSetValues = (sets: { reps?: number; weight?: number }[]) => {
     let lastPerformedReps: number | undefined;
     let lastPerformedWeight: number | undefined;
     for (const set of sets) {
@@ -251,7 +251,7 @@ export function deriveExerciseDefsFromWorkouts(
     for (const exercise of workout.exercises) {
       const name = exercise.name.trim();
       if (!name) continue;
-      const { lastPerformedReps, lastPerformedWeight } = latestSetValues(
+      const { lastPerformedReps, lastPerformedWeight } = lastSetValues(
         exercise.sets
       );
 
