@@ -79,7 +79,12 @@ export class WorkoutSessionView extends ItemView {
       return;
     }
 
-    new Setting(contentEl).setName(this.session.name).setHeading();
+    const titleEl = contentEl.createDiv({
+      text: this.session.name,
+      cls: "workout-session-title",
+    });
+    titleEl.setAttr("role", "heading");
+    titleEl.setAttr("aria-level", "2");
     const meta = contentEl.createEl("p", { cls: "workout-session-meta" });
     meta.setText(
       `${this.session.date}${

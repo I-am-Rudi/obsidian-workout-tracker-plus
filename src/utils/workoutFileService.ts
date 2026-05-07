@@ -141,7 +141,7 @@ export class WorkoutFileService {
    */
   async syncFrontmatterWithContent(file: TFile): Promise<boolean> {
     try {
-      let hasChanges = false;
+      const originalContent = await this.app.vault.read(file);
       await this.app.vault.process(file, (content) => {
         // Try to parse the workout data from markdown body first (since that's what users edit)
         let workout = this.parseWorkoutFromMarkdownBody(content, file.basename);
@@ -159,10 +159,10 @@ export class WorkoutFileService {
         if (content === expectedContent) {
           return content;
         }
-        hasChanges = true;
         return expectedContent;
       });
-      return hasChanges;
+      const updatedContent = await this.app.vault.read(file);
+      return updatedContent !== originalContent;
     } catch (error) {
       console.error(`Error syncing frontmatter for ${file.path}:`, error);
       return false;
