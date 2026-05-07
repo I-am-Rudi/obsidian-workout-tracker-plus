@@ -17,6 +17,7 @@ import {
   Workout,
   WorkoutPlanDefinition,
   WorkoutSession,
+  WorkoutSessionSet,
   WorkoutTrackerSettings,
 } from "./types";
 import { DEFAULT_SETTINGS } from "./settings/defaults";
@@ -627,7 +628,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
         continue;
       }
 
-      let latestSet = undefined;
+      let latestSet: WorkoutSessionSet | undefined;
       for (let i = exercise.sets.length - 1; i >= 0; i--) {
         const set = exercise.sets[i];
         if (set.completed && (set.actualReps !== undefined || set.actualWeight !== undefined)) {
