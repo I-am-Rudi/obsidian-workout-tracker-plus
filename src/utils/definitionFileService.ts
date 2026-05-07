@@ -125,17 +125,20 @@ export class DefinitionFileService {
       if (!frontmatter || frontmatter['wj-type'] !== "exercise") {
         return null;
       }
+      const id = this.asString(frontmatter['wj-id']) || file.basename;
+      const name = this.asString(frontmatter['wj-name']) || file.basename;
+      const type = this.asExerciseType(frontmatter['wj-exercise-type']) || "strength";
       return {
-        id: frontmatter['wj-id'] || file.basename,
-        name: frontmatter['wj-name'] || file.basename,
-        type: frontmatter['wj-exercise-type'] || "strength",
-        muscleGroups: frontmatter['wj-muscle-groups'] || [],
-        notes: frontmatter['wj-notes'],
-        defaultSets: frontmatter['wj-default-sets'],
-        defaultReps: frontmatter['wj-default-reps'],
-        defaultWeight: frontmatter['wj-default-weight'],
-        defaultDuration: frontmatter['wj-default-duration'],
-        defaultDistance: frontmatter['wj-default-distance'],
+        id,
+        name,
+        type,
+        muscleGroups: this.asStringArray(frontmatter['wj-muscle-groups']),
+        notes: this.asString(frontmatter['wj-notes']),
+        defaultSets: this.asNumber(frontmatter['wj-default-sets']),
+        defaultReps: this.asNumber(frontmatter['wj-default-reps']),
+        defaultWeight: this.asNumber(frontmatter['wj-default-weight']),
+        defaultDuration: this.asNumber(frontmatter['wj-default-duration']),
+        defaultDistance: this.asNumber(frontmatter['wj-default-distance']),
         filePath: file.path,
       };
     } catch (error) {
@@ -150,13 +153,15 @@ export class DefinitionFileService {
       if (!frontmatter || frontmatter['wj-type'] !== "routine") {
         return null;
       }
+      const id = this.asString(frontmatter['wj-id']) || file.basename;
+      const name = this.asString(frontmatter['wj-name']) || file.basename;
       return {
-        id: frontmatter['wj-id'] || file.basename,
-        name: frontmatter['wj-name'] || file.basename,
+        id,
+        name,
         exercises: (frontmatter['wj-exercises'] || []) as RoutineExerciseEntry[],
-        estimatedDuration: frontmatter['wj-estimated-duration'],
-        notes: frontmatter['wj-notes'],
-        planTags: frontmatter['wj-plan-tags'] || [],
+        estimatedDuration: this.asNumber(frontmatter['wj-estimated-duration']),
+        notes: this.asString(frontmatter['wj-notes']),
+        planTags: this.asStringArray(frontmatter['wj-plan-tags']),
         filePath: file.path,
       };
     } catch (error) {
@@ -171,11 +176,13 @@ export class DefinitionFileService {
       if (!frontmatter || frontmatter['wj-type'] !== "plan") {
         return null;
       }
+      const id = this.asString(frontmatter['wj-id']) || file.basename;
+      const name = this.asString(frontmatter['wj-name']) || file.basename;
       return {
-        id: frontmatter['wj-id'] || file.basename,
-        name: frontmatter['wj-name'] || file.basename,
+        id,
+        name,
         routines: (frontmatter['wj-routines'] || []) as WorkoutPlanRoutineEntry[],
-        notes: frontmatter['wj-notes'],
+        notes: this.asString(frontmatter['wj-notes']),
         filePath: file.path,
       };
     } catch (error) {
@@ -471,5 +478,34 @@ export class DefinitionFileService {
       );
     }
     return normalized;
+  }
+
+  private asString(value: unknown): string | undefined {
+    return typeof value === "string" ? value : undefined;
+  }
+
+  private asNumber(value: unknown): number | undefined {
+    return typeof value === "number" ? value : undefined;
+  }
+
+  private asStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value.filter((entry): entry is string => typeof entry === "string");
+  }
+
+  private asExerciseType(
+    value: unknown
+  ): ExerciseDefinition["type"] | undefined {
+    if (
+      value === "strength" ||
+      value === "cardio" ||
+      value === "flexibility" ||
+      value === "other"
+    ) {
+      return value;
+    }
+    return undefined;
   }
 }

@@ -26,12 +26,12 @@ export class WorkoutSessionView extends ItemView {
     return "Workout session";
   }
 
-  onOpen() {
+  async onOpen(): Promise<void> {
     this.session = this.plugin.activeSession;
     this.render();
   }
 
-  onClose() {
+  async onClose(): Promise<void> {
     this.timerIntervals.forEach((intervalId) => clearInterval(intervalId));
     this.timerIntervals.clear();
     this.contentEl.empty();
