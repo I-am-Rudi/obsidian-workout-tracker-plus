@@ -103,12 +103,14 @@ export class AddSessionExerciseModal extends Modal {
 
   private buildSessionExercise(ex: ExerciseDefinition): WorkoutSessionExercise {
     const numSets = ex.defaultSets ?? DEFAULT_NUM_SETS;
+    const reps = ex.lastPerformedReps ?? ex.defaultReps;
+    const weight = ex.lastPerformedWeight ?? ex.defaultWeight;
     const sets = Array.from({ length: numSets }, (_, i) => ({
       setIndex: i + 1,
-      targetReps: ex.defaultReps,
-      targetWeight: ex.defaultWeight,
-      actualReps: ex.defaultReps,
-      actualWeight: ex.defaultWeight,
+      targetReps: reps,
+      targetWeight: weight,
+      actualReps: reps,
+      actualWeight: weight,
       duration: ex.defaultDuration,
       distance: ex.defaultDistance,
       completed: false,

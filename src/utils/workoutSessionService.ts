@@ -18,7 +18,13 @@ export class WorkoutSessionService {
 
   async createSessionFromRoutine(
     routine: RoutineDefinition,
-    options?: { planId?: string; planName?: string; exerciseNotesMap?: Map<string, string>; exerciseFilePathMap?: Map<string, string> }
+    options?: {
+      planId?: string;
+      planName?: string;
+      exerciseNotesMap?: Map<string, string>;
+      exerciseFilePathMap?: Map<string, string>;
+      exerciseLastPerformedMap?: Map<string, { reps?: number; weight?: number }>;
+    }
   ): Promise<WorkoutSession> {
     const exercises: WorkoutSessionExercise[] = [];
     for (const exercise of routine.exercises) {
@@ -30,14 +36,25 @@ export class WorkoutSessionService {
           exercise.exerciseId,
           setIndex
         );
+        const fallbackLastPerformed = options?.exerciseLastPerformedMap?.get(
+          exercise.exerciseId
+        );
+        const reps =
+          historical?.reps ??
+          fallbackLastPerformed?.reps ??
+          exercise.sets[i]?.reps;
+        const weight =
+          historical?.weight ??
+          fallbackLastPerformed?.weight ??
+          exercise.sets[i]?.weight;
         sets.push({
           setIndex,
-          previousReps: historical?.reps,
-          previousWeight: historical?.weight,
-          targetReps: exercise.sets[i]?.reps,
-          targetWeight: exercise.sets[i]?.weight,
-          actualReps: exercise.sets[i]?.reps,
-          actualWeight: exercise.sets[i]?.weight,
+          previousReps: historical?.reps ?? fallbackLastPerformed?.reps,
+          previousWeight: historical?.weight ?? fallbackLastPerformed?.weight,
+          targetReps: reps,
+          targetWeight: weight,
+          actualReps: reps,
+          actualWeight: weight,
           duration: exercise.sets[i]?.duration,
           distance: exercise.sets[i]?.distance,
           restTime: exercise.sets[i]?.restTime,

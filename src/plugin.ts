@@ -16,6 +16,7 @@ import {
   Workout,
   WorkoutPlanDefinition,
   WorkoutSession,
+  WorkoutSessionSet,
   WorkoutTrackerSettings,
 } from "./types";
 import { DEFAULT_SETTINGS } from "./settings/defaults";
@@ -364,6 +365,15 @@ export default class WorkoutTrackerPlugin extends Plugin {
         .filter((def) => def.filePath)
         .map((def) => [def.id, def.filePath])
     );
+    const exerciseLastPerformedMap = new Map(
+      exerciseDefs.map((def) => [
+        def.id,
+        {
+          reps: def.lastPerformedReps,
+          weight: def.lastPerformedWeight,
+        },
+      ])
+    );
     const session = await this.workoutSessionService.createSessionFromRoutine(
       resolved.resolved,
       {
@@ -371,6 +381,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
         planName: plan?.name,
         exerciseNotesMap,
         exerciseFilePathMap,
+        exerciseLastPerformedMap,
       }
     );
     this.activeSession = session;
@@ -408,6 +419,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
     if (options.storeNewTargets) {
       await this.performanceCsvService.appendTargetUpdate(sessionToSave);
     }
+    await this.storeLastPerformedValues(sessionToSave);
 
     if (
       sessionToSave.routineId &&
@@ -476,6 +488,8 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
     const exercise = await this.definitionService.loadExerciseFromFile(file);
     if (exercise) {
+      const reps = exercise.lastPerformedReps ?? exercise.defaultReps;
+      const weight = exercise.lastPerformedWeight ?? exercise.defaultWeight;
       const routineDef: RoutineDefinition = {
         id: `single-${exercise.id}`,
         name: exercise.name,
@@ -488,8 +502,8 @@ export default class WorkoutTrackerPlugin extends Plugin {
                 exercise.defaultSets ||
                 WorkoutTrackerPlugin.DEFAULT_SINGLE_EXERCISE_SETS,
             }).map(() => ({
-              reps: exercise.defaultReps,
-              weight: exercise.defaultWeight,
+              reps,
+              weight,
               duration: exercise.defaultDuration,
               distance: exercise.defaultDistance,
             })),
@@ -610,6 +624,46 @@ export default class WorkoutTrackerPlugin extends Plugin {
     };
     await this.definitionService.createRoutineDefinition(routine);
     new Notice(`Routine note created: ${name}`);
+  }
+
+  private async storeLastPerformedValues(session: WorkoutSession): Promise<void> {
+    const definitions = await this.definitionService.loadExerciseDefinitions();
+    const byId = new Map(definitions.map((definition) => [definition.id, definition]));
+    const byName = new Map(definitions.map((definition) => [definition.name, definition]));
+
+    for (const exercise of session.exercises) {
+      const definition = byId.get(exercise.exerciseId) || byName.get(exercise.exerciseName);
+      if (!definition) {
+        continue;
+      }
+
+      let latestSet: WorkoutSessionSet | undefined;
+      for (let i = exercise.sets.length - 1; i >= 0; i--) {
+        const set = exercise.sets[i];
+        if (set.completed && (set.actualReps !== undefined || set.actualWeight !== undefined)) {
+          latestSet = set;
+          break;
+        }
+      }
+      if (!latestSet) {
+        continue;
+      }
+
+      const lastReps = latestSet.actualReps ?? definition.lastPerformedReps;
+      const lastWeight = latestSet.actualWeight ?? definition.lastPerformedWeight;
+      if (
+        definition.lastPerformedReps === lastReps &&
+        definition.lastPerformedWeight === lastWeight
+      ) {
+        continue;
+      }
+
+      await this.definitionService.createExerciseDefinition({
+        ...definition,
+        lastPerformedReps: lastReps,
+        lastPerformedWeight: lastWeight,
+      });
+    }
   }
 
   private async createRoutineFromWorkoutFile(file: TFile): Promise<void> {

@@ -58,22 +58,27 @@ export class ExerciseModal extends Modal {
     // Load from template button
     new Setting(contentEl).addButton((btn) =>
       btn.setButtonText("Load from template").onClick(() => {
-        const template = this.plugin.settings.exerciseTemplates.find(
-          (t) => t.name === this.exercise.name
-        );
-        if (template) {
-          // Add default sets based on template
-          if (template.defaultSets) {
-            for (let i = 0; i < template.defaultSets; i++) {
-              this.exercise.sets.push({
-                reps: template.defaultReps,
-                weight: template.defaultWeight,
-                duration: template.defaultDuration,
-              });
-            }
-            this.renderSets(setsContainer);
+        void (async () => {
+          const template = this.plugin.settings.exerciseTemplates.find(
+            (t) => t.name === this.exercise.name
+          );
+          if (!template?.defaultSets) {
+            return;
           }
-        }
+
+          const definitions = await this.plugin.definitionService.loadExerciseDefinitions();
+          const definition = definitions.find((def) => def.name === template.name);
+          const reps = definition?.lastPerformedReps ?? template.defaultReps;
+          const weight = definition?.lastPerformedWeight ?? template.defaultWeight;
+          for (let i = 0; i < template.defaultSets; i++) {
+            this.exercise.sets.push({
+              reps,
+              weight,
+              duration: template.defaultDuration,
+            });
+          }
+          this.renderSets(setsContainer);
+        })();
       })
     );
 
