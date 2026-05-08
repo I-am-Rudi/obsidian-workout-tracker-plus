@@ -388,6 +388,15 @@ export default class WorkoutTrackerPlugin extends Plugin {
     await this.openSessionView(preferPopout);
   }
 
+  async startQuickLogSession(preferPopout: boolean): Promise<void> {
+    const routineDef: RoutineDefinition = {
+      id: `quick-log-${Date.now()}`,
+      name: "untitled",
+      exercises: [],
+    };
+    await this.startSessionFromRoutine(routineDef, preferPopout);
+  }
+
   finishActiveSessionFromView(): void {
     const hasUnfinishedSets =
       this.activeSession?.exercises.some((exercise) =>

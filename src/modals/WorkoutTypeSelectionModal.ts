@@ -1,6 +1,5 @@
 import WorkoutTrackerPlugin from "../plugin";
 import { App, Modal, Setting } from "obsidian";
-import { WorkoutModal } from "./WorkoutModal";
 import { WorkoutStatsModal } from "./WorkoutStatsModal";
 import { PlanSelectionModal } from "./PlanSelectionModal";
 import { RoutineSelectionModal } from "./RoutineSelectionModal";
@@ -20,11 +19,11 @@ export class WorkoutTypeSelectionModal extends Modal {
 
     new Setting(contentEl)
       .setName("Quick log")
-      .setDesc("Create a detailed workout with multiple exercises")
+      .setDesc("Open an active session with an empty untitled routine")
       .addButton((btn) =>
-        btn.setButtonText("Add workout").onClick(() => {
+        btn.setButtonText("Quick log").onClick(() => {
           this.close();
-          new WorkoutModal(this.app, this.plugin).open();
+          void this.plugin.startQuickLogSession(true);
         })
       );
 
