@@ -390,7 +390,7 @@ export default class WorkoutTrackerPlugin extends Plugin {
 
   async startQuickLogSession(preferPopout: boolean): Promise<void> {
     const routineDef: RoutineDefinition = {
-      id: `quick-log-${generateId()}`,
+      id: `untitled-${generateId()}`,
       name: "untitled",
       exercises: [],
     };
