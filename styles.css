@@ -557,7 +557,7 @@
     min-height: 1.4em;
     border: 1px solid var(--background-modifier-border);
     border-radius: 0;
-    background: var(--background-primary);
+    background: transparent;
     color: var(--text-normal);
     font-size: 13px;
     line-height: 1.35;
