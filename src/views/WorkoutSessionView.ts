@@ -591,6 +591,7 @@ export class WorkoutSessionView extends ItemView {
       this.plugin.settings.enableSetCompletionSoundFeedback,
       [35],
       880,
+      0.08,
       0.08
     );
   }
@@ -601,6 +602,7 @@ export class WorkoutSessionView extends ItemView {
       this.plugin.settings.enableRestTimerSoundFeedback,
       [180, 80, 180],
       660,
+      0.08,
       0.2
     );
   }
@@ -610,6 +612,7 @@ export class WorkoutSessionView extends ItemView {
     soundEnabled: boolean,
     vibrationPattern: number | number[],
     frequency: number,
+    gainPeak: number,
     durationSeconds: number
   ): void {
     if (
@@ -626,18 +629,18 @@ export class WorkoutSessionView extends ItemView {
     }
 
     try {
-      const AudioContextCtor = window.AudioContext;
-      if (!AudioContextCtor) {
+      const AudioContextConstructor = window.AudioContext;
+      if (!AudioContextConstructor) {
         return;
       }
-      const audioContext = new AudioContextCtor();
+      const audioContext = new AudioContextConstructor();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       oscillator.type = "sine";
       oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
       gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(
-        0.08,
+        gainPeak,
         audioContext.currentTime + 0.01
       );
       gainNode.gain.exponentialRampToValueAtTime(
