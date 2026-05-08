@@ -594,7 +594,7 @@ export class WorkoutSessionView extends ItemView {
     this.triggerFeedback(
       this.plugin.settings.enableSetCompletionVibrationFeedback,
       this.plugin.settings.enableSetCompletionSoundFeedback,
-      [35],
+      [90],
       880,
       0.08,
       0.08
@@ -605,10 +605,10 @@ export class WorkoutSessionView extends ItemView {
     this.triggerFeedback(
       this.plugin.settings.enableRestTimerVibrationFeedback,
       this.plugin.settings.enableRestTimerSoundFeedback,
-      [180, 80, 180],
-      660,
+      [260, 100, 260],
+      880,
       0.08,
-      0.2
+      0.14
     );
   }
 
