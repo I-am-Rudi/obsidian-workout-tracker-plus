@@ -212,7 +212,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Set completion vibration feedback")
-      .setDesc("Vibrate on mobile when checking off a set")
+      .setDesc("Vibrate when checking off a set (mobile only)")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.enableSetCompletionVibrationFeedback)
@@ -236,7 +236,7 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Rest timer vibration feedback")
-      .setDesc("Vibrate on mobile when a rest timer completes")
+      .setDesc("Vibrate when a rest timer completes (mobile only)")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.enableRestTimerVibrationFeedback)
