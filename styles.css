@@ -555,8 +555,9 @@
     flex: 1 1 auto;
     width: 100%;
     min-height: 1.4em;
-    border: 1px solid var(--background-modifier-border);
+    border: none;
     border-radius: 0;
+    box-shadow: none;
     background: transparent;
     color: var(--text-normal);
     font-size: 13px;
@@ -572,6 +573,7 @@
 
 .workout-session-routine-note-input:focus {
     outline: none;
+    box-shadow: none;
 }
 
 /* Mobile layout: set cards (480px and below) */
