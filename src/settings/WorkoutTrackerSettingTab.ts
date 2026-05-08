@@ -210,6 +210,54 @@ export class WorkoutTrackerSettingTab extends PluginSettingTab {
           })
       );
 
+    new Setting(containerEl)
+      .setName("Set completion vibration feedback")
+      .setDesc("Vibrate on mobile when checking off a set")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableSetCompletionVibrationFeedback)
+          .onChange(async (value) => {
+            this.plugin.settings.enableSetCompletionVibrationFeedback = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Set completion sound feedback")
+      .setDesc("Play a sound when checking off a set")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableSetCompletionSoundFeedback)
+          .onChange(async (value) => {
+            this.plugin.settings.enableSetCompletionSoundFeedback = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Rest timer vibration feedback")
+      .setDesc("Vibrate on mobile when a rest timer completes")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableRestTimerVibrationFeedback)
+          .onChange(async (value) => {
+            this.plugin.settings.enableRestTimerVibrationFeedback = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Rest timer sound feedback")
+      .setDesc("Play a sound when a rest timer completes")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableRestTimerSoundFeedback)
+          .onChange(async (value) => {
+            this.plugin.settings.enableRestTimerSoundFeedback = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
     new Setting(containerEl).setName("Migration").setHeading();
     new Setting(containerEl)
       .setName("Template migration status")

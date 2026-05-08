@@ -45,6 +45,10 @@ export const DEFAULT_SETTINGS: WorkoutTrackerSettings = {
   weightUnit: "lb",
   // Default rest timer in seconds shown after checking off a set (0 = disabled)
   defaultRestTimerSeconds: 90,
+  enableSetCompletionVibrationFeedback: true,
+  enableSetCompletionSoundFeedback: true,
+  enableRestTimerVibrationFeedback: true,
+  enableRestTimerSoundFeedback: true,
   migration: {
     completed: false,
     exerciseCount: 0,

@@ -337,6 +337,7 @@ export class WorkoutSessionView extends ItemView {
             exercise.completed = exercise.sets.every((exerciseSet) => exerciseSet.completed);
             row.toggleClass("workout-session-row-completed", set.completed);
             if (done.checked) {
+              this.triggerSetCompletionFeedback();
               const dur = exercise.restTimerSeconds !== undefined
                 ? exercise.restTimerSeconds
                 : this.plugin.settings.defaultRestTimerSeconds;
@@ -485,6 +486,7 @@ export class WorkoutSessionView extends ItemView {
       exercise.completed = exercise.sets.every((s) => s.completed);
       card.toggleClass("workout-session-row-completed", set.completed);
       if (done.checked) {
+        this.triggerSetCompletionFeedback();
         const dur = exercise.restTimerSeconds !== undefined
           ? exercise.restTimerSeconds
           : this.plugin.settings.defaultRestTimerSeconds;
@@ -556,6 +558,7 @@ export class WorkoutSessionView extends ItemView {
         this.timerRemaining.delete(exerciseIndex);
         display.hide();
         display.textContent = "";
+        this.triggerRestTimerCompletionFeedback();
         new Notice("🏋️ Rest complete! Time for the next set.");
         return;
       }
@@ -580,6 +583,77 @@ export class WorkoutSessionView extends ItemView {
     this.timerRemaining.delete(exerciseIndex);
     display.hide();
     display.textContent = "";
+  }
+
+  private triggerSetCompletionFeedback(): void {
+    this.triggerFeedback(
+      this.plugin.settings.enableSetCompletionVibrationFeedback,
+      this.plugin.settings.enableSetCompletionSoundFeedback,
+      [35],
+      880,
+      0.08
+    );
+  }
+
+  private triggerRestTimerCompletionFeedback(): void {
+    this.triggerFeedback(
+      this.plugin.settings.enableRestTimerVibrationFeedback,
+      this.plugin.settings.enableRestTimerSoundFeedback,
+      [180, 80, 180],
+      660,
+      0.2
+    );
+  }
+
+  private triggerFeedback(
+    vibrateEnabled: boolean,
+    soundEnabled: boolean,
+    vibrationPattern: number | number[],
+    frequency: number,
+    durationSeconds: number
+  ): void {
+    if (
+      vibrateEnabled &&
+      Platform.isMobile &&
+      typeof navigator !== "undefined" &&
+      "vibrate" in navigator
+    ) {
+      navigator.vibrate(vibrationPattern);
+    }
+
+    if (!soundEnabled || typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const AudioContextCtor = window.AudioContext;
+      if (!AudioContextCtor) {
+        return;
+      }
+      const audioContext = new AudioContextCtor();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.08,
+        audioContext.currentTime + 0.01
+      );
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.0001,
+        audioContext.currentTime + durationSeconds
+      );
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + durationSeconds);
+      oscillator.onended = () => {
+        void audioContext.close();
+      };
+    } catch {
+      // no-op: feedback is best-effort only
+    }
   }
 
   async finishWithOptions(options: SessionFinishOptions): Promise<void> {

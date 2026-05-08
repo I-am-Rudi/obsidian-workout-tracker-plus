@@ -26,6 +26,10 @@ export interface WorkoutTrackerSettings {
   dateFormat: string;
   weightUnit: "kg" | "lb";
   defaultRestTimerSeconds: number;
+  enableSetCompletionVibrationFeedback: boolean;
+  enableSetCompletionSoundFeedback: boolean;
+  enableRestTimerVibrationFeedback: boolean;
+  enableRestTimerSoundFeedback: boolean;
   migration: MigrationState;
   noteTemplates: NoteContentTemplates;
 }
