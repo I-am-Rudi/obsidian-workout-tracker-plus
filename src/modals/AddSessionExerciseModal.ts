@@ -1,7 +1,8 @@
 import { App, Modal, Notice, Setting } from "obsidian";
-import { ExerciseDefinition, WorkoutSessionExercise } from "../types";
+import { ExerciseDefinition, SetType, WorkoutSessionExercise } from "../types";
 import WorkoutTrackerPlugin from "../plugin";
 import { createIdFromName } from "../utils/idUtils";
+import { PerformanceCsvService } from "../utils/performanceCsvService";
 
 const DEFAULT_NUM_SETS = 3;
 
@@ -11,17 +12,23 @@ export class AddSessionExerciseModal extends Modal {
   private onAdd: (exercise: WorkoutSessionExercise) => void;
   private searchQuery = "";
   private listEl: HTMLElement;
+  private csvService: PerformanceCsvService;
+  private routineId: string | undefined;
 
   constructor(
     app: App,
     plugin: WorkoutTrackerPlugin,
     exercises: ExerciseDefinition[],
-    onAdd: (exercise: WorkoutSessionExercise) => void
+    onAdd: (exercise: WorkoutSessionExercise) => void,
+    csvService: PerformanceCsvService,
+    routineId?: string
   ) {
     super(app);
     this.plugin = plugin;
     this.exercises = exercises;
     this.onAdd = onAdd;
+    this.csvService = csvService;
+    this.routineId = routineId;
   }
 
   onOpen() {
@@ -76,8 +83,10 @@ export class AddSessionExerciseModal extends Modal {
         });
       }
       item.addEventListener("click", () => {
-        this.onAdd(this.buildSessionExercise(ex));
-        this.close();
+        void (async () => {
+          this.onAdd(await this.buildSessionExercise(ex));
+          this.close();
+        })();
       });
     });
   }
@@ -97,11 +106,36 @@ export class AddSessionExerciseModal extends Modal {
       def.filePath = file.path;
     }
     new Notice(`Exercise note created: ${name}`);
-    this.onAdd(this.buildSessionExercise(def));
+    this.onAdd(await this.buildSessionExercise(def));
     this.close();
   }
 
-  private buildSessionExercise(ex: ExerciseDefinition): WorkoutSessionExercise {
+  private async buildSessionExercise(ex: ExerciseDefinition): Promise<WorkoutSessionExercise> {
+    const lastSets = await this.csvService.getLatestSetsForExercise(this.routineId, ex.id);
+    if (lastSets && lastSets.length > 0) {
+      const sets = lastSets.map((s) => ({
+        setIndex: s.setIndex,
+        previousReps: s.reps,
+        previousWeight: s.weight,
+        targetReps: s.reps,
+        targetWeight: s.weight,
+        actualReps: s.reps,
+        actualWeight: s.weight,
+        duration: ex.defaultDuration,
+        distance: ex.defaultDistance,
+        completed: false,
+        setType: (s.setType && s.setType !== "default" ? s.setType : undefined) as SetType | undefined,
+      }));
+      return {
+        exerciseId: ex.id,
+        exerciseName: ex.name,
+        sets,
+        completed: false,
+        exerciseNotes: ex.notes || undefined,
+        exerciseFilePath: ex.filePath,
+      };
+    }
+
     const numSets = ex.defaultSets ?? DEFAULT_NUM_SETS;
     const reps = ex.lastPerformedReps ?? ex.defaultReps;
     const weight = ex.lastPerformedWeight ?? ex.defaultWeight;
